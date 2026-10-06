@@ -1,0 +1,467 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fari Uploader</title>
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--red:#ff2a3a;--ink:#f1e9ea;--mut:#9a8a8d;--line:rgba(255,42,58,.28);--ok:#7be08a;--bad:#ff7b86;--warn:#ffd166}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;min-height:100vh;color:var(--ink);font:17px/1.55 Georgia,serif;padding:30px 16px 90px;overflow-x:hidden;
+ background:radial-gradient(80% 45% at 50% -5%,rgba(255,42,58,.3),transparent 70%),radial-gradient(60% 30% at 50% 108%,rgba(142,13,24,.4),transparent 70%),#050203 fixed}
+main{max-width:920px;margin:0 auto;position:relative;z-index:1}
+.petals{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.petals span{position:absolute;top:-30px;width:14px;height:10px;background:var(--red);border-radius:80% 0 80% 0;opacity:.5;filter:drop-shadow(0 0 4px var(--red));animation:fall linear infinite}
+@keyframes fall{to{transform:translate3d(var(--dx),110vh,0) rotate(540deg)}}
+h1{font:700 clamp(2.8rem,10vw,5rem)/1 "UnifrakturCook",Georgia,serif;text-align:center;margin:8px 0 6px;background:linear-gradient(#fff,#8d8386 65%,#e8e2e4);-webkit-background-clip:text;background-clip:text;color:transparent;animation:glow 4s ease-in-out infinite}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 10px rgba(255,42,58,.55))}50%{filter:drop-shadow(0 0 22px rgba(255,42,58,.95))}}
+.sub{text-align:center;color:var(--mut);margin:0 0 26px;letter-spacing:.04em}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes slide{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
+.box{background:linear-gradient(180deg,#120709,#0b0506);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:18px;box-shadow:0 10px 40px rgba(0,0,0,.5),0 0 30px rgba(255,42,58,.06)}
+.tab:not([hidden]),.pg:not([hidden]),#wiz:not([hidden]){animation:rise .4s ease both}
+.row{display:flex;gap:14px;flex-wrap:wrap}
+label{flex:1 1 200px;display:flex;flex-direction:column;gap:5px;color:#c9c3c5;font-size:.95rem}
+input[type=text],input[type=password],select,textarea{background:#000;border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:10px;font:inherit;width:100%;transition:border-color .2s,box-shadow .2s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px rgba(255,42,58,.25)}
+.chk{flex-direction:row;align-items:center;gap:8px;flex:1 1 100%}
+button{background:rgba(255,42,58,.1);border:1px solid var(--red);border-radius:8px;color:var(--ink);padding:10px 20px;font:inherit;cursor:pointer;transition:transform .15s,box-shadow .25s,background .25s}
+button:hover{background:rgba(255,42,58,.28);transform:translateY(-2px);box-shadow:0 6px 22px rgba(255,42,58,.4)}
+button:active{transform:scale(.97)}
+:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.tabs{display:flex;gap:6px;margin-bottom:18px;padding:6px;background:#0b0506;border:1px solid var(--line);border-radius:12px}
+.tabs button{flex:1;border-color:transparent;background:transparent;padding:9px 8px}
+.tabs button.on{background:rgba(255,42,58,.3);border-color:var(--red);box-shadow:0 0 18px rgba(255,42,58,.35)}
+.drop{display:block;text-align:center;padding:34px 16px;border:1.5px dashed var(--red);border-radius:12px;cursor:pointer;color:#c9c3c5;background:rgba(255,42,58,.04);transition:background .25s,transform .25s,box-shadow .25s}
+.drop:hover,.drop.over{background:rgba(255,42,58,.14);transform:scale(1.01);box-shadow:0 0 30px rgba(255,42,58,.25)}
+.drop input{display:none}
+.it{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07);animation:slide .35s ease both}
+.load-fade{position:relative}
+.load-fade.has-more:after{content:"";position:absolute;z-index:1;left:0;right:0;bottom:0;height:46px;background:linear-gradient(transparent,#0b0506);pointer-events:none}
+.load-controls{margin-top:8px}
+.load-controls button{width:42px;height:40px;padding:6px;font:700 1.2rem/1 Georgia,serif}
+.it button{padding:5px 13px}
+.st{font-size:.92rem;color:var(--mut)}
+.st.berhasil{color:var(--ok)}.st.gagal{color:var(--bad)}.st.mengupload{color:var(--warn)}
+small{display:block;color:var(--mut)}
+.bar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:16px}
+#msg{color:#c9c3c5}
+.prog{height:4px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:14px}
+.prog i{display:block;height:100%;width:35%;background:linear-gradient(90deg,transparent,var(--red),transparent);animation:sweep 1.4s ease-in-out infinite}
+@keyframes sweep{from{transform:translateX(-100%)}to{transform:translateX(300%)}}
+.pill{display:inline-block;padding:1px 10px;border-radius:999px;font-size:.82rem;border:1px solid currentColor;white-space:nowrap;color:var(--mut)}
+.pill.berhasil{color:var(--ok);background:rgba(123,224,138,.08)}.pill.gagal{color:var(--bad);background:rgba(255,123,134,.08)}
+.pill.mengupload{color:var(--warn);background:rgba(255,209,102,.08);animation:blink 1.4s ease-in-out infinite}
+@keyframes blink{50%{opacity:.5}}
+.dots{display:flex;gap:8px;justify-content:center;margin-bottom:16px}
+.dots i{width:10px;height:10px;border-radius:50%;border:1px solid var(--red);transition:background .3s,box-shadow .3s,transform .3s}
+.dots i.on{background:var(--red);box-shadow:0 0 8px var(--red);transform:scale(1.25)}
+.pg h2{margin:0 0 10px;font-size:1.5rem}.pg p,.pg li{color:#c9c3c5}.pg li{margin-bottom:7px}.pg a{color:var(--red)}
+.pg code{background:#000;border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+.tip{border-left:2px solid var(--red);padding-left:12px}
+[hidden]{display:none!important}
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:.88rem}
+th,td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;vertical-align:top}th{color:var(--mut);font-weight:normal;white-space:nowrap}
+tbody tr{animation:slide .35s ease both;transition:background .2s}tbody tr:hover{background:rgba(255,42,58,.07)}
+.res{background:#15090b;border:1px solid var(--line);border-radius:10px;max-height:320px;overflow:auto;margin-top:6px;animation:rise .25s ease both}
+.rs{display:flex;gap:12px;align-items:center;width:100%;text-align:left;border:0;border-bottom:1px solid rgba(255,255,255,.06);border-radius:0;background:none;box-shadow:none;padding:9px 12px}
+.rs:hover{background:rgba(255,42,58,.15);transform:none;box-shadow:none}
+.rs img{width:44px;height:44px;border-radius:8px;background:#000;object-fit:cover;flex:none}
+details summary{cursor:pointer;transition:color .2s}details summary:hover{color:var(--red)}
+dialog{background:#120709;color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:22px;width:min(520px,92vw);box-shadow:0 20px 70px rgba(0,0,0,.8),0 0 40px rgba(255,42,58,.15)}
+dialog[open]{animation:rise .25s ease both}dialog::backdrop{background:rgba(0,0,0,.7);backdrop-filter:blur(3px)}
+dialog h3{margin:0 0 12px;font-weight:normal;font-size:1.4rem}
+input[type=checkbox]{accent-color:var(--red)}
+.mxw{max-height:440px;overflow:auto;border:1px solid var(--line);border-radius:10px;margin-top:10px}
+#mx thead th{position:sticky;top:0;background:#160a0c;z-index:1}#mx td,#mx th{white-space:nowrap;vertical-align:middle}
+#mx input[type=checkbox]{width:18px;height:18px;cursor:pointer;vertical-align:middle}#mx input:disabled{cursor:not-allowed;opacity:.55}
+.act{white-space:nowrap}.act button{padding:3px 11px;margin-right:6px;font-size:.82rem}
+#plt input{padding:5px 8px}#plt td,#plt th{white-space:nowrap;vertical-align:middle}#pladd{max-height:220px;overflow:auto;margin:8px 0;display:flex;flex-direction:column;gap:6px}
+@media (max-width:560px){.it{grid-template-columns:1fr auto}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body><div class="petals" id="petals"></div><main>
+<h1>Fari Noveri</h1>
+<p class="sub">Upload banyak lagu ke Roblox, lalu tinggal tidur</p>
+<section class="box" id="wiz" hidden>
+ <div class="dots" id="dots"></div>
+ <div class="pg"><h2>Alat ini gunanya apa?</h2>
+  <p>Biasanya upload lagu ke Roblox harus satu per satu lewat website. Alat ini membantumu mengupload banyak lagu sekaligus. Kamu tinggal memilih lagunya, lalu biarkan jalan sendiri sampai selesai.</p>
+  <p>Sebelum mulai, ada beberapa hal yang perlu disiapkan. Semuanya dijelaskan satu per satu di halaman berikutnya, jadi tenang saja.</p></div>
+ <div class="pg"><h2>Cek akun dan lagumu dulu</h2><ul>
+  <li>Akun Roblox kamu sebaiknya sudah verifikasi identitas (istilahnya ID verified). Kalau sudah, kamu boleh upload 100 lagu tiap bulan. Kalau belum, cuma 10 lagu.</li>
+  <li>Lagu harus berformat mp3, ogg, wav, atau flac. Ukuran maksimal 20 MB dan panjang maksimal 7 menit.</li>
+  <li>Lagunya harus buatanmu sendiri atau kamu punya izin memakainya. Lagu orang lain biasanya ditolak Roblox.</li></ul>
+  <p class="tip">Setelah diupload, tiap lagu diperiksa Roblox dulu. Jadi hasilnya belum tentu langsung bisa dipakai.</p></div>
+ <div class="pg"><h2>Buat kunci API</h2>
+  <p>Kunci API itu seperti password khusus yang mengizinkan alat ini mengupload atas nama akunmu. Kamu membuatnya sendiri di website Roblox.</p>
+  <ol><li>Buka <a href="https://create.roblox.com/credentials" target="_blank" rel="noopener">halaman kunci API Roblox</a>, lalu klik <b>Create API Key</b>.</li>
+  <li>Isi nama bebas, misalnya <code>upload-lagu</code>.</li>
+  <li>Di bagian <b>Access Permissions</b>, pilih <b>Assets API</b>, klik tombol tambah, lalu centang <b>Read</b> dan <b>Write</b>. Kalau nanti mau memberi izin lagu ke komunitas tertentu, tambahkan juga <b>Asset Permissions</b> dengan Write kalau pilihannya ada. Kalau lagunya untuk grup, buat kunci ini dari halaman kredensial grupnya.</li>
+  <li>Di bagian <b>Security</b>, kalau ada pilihan <b>Restrict IP addresses</b>, biarkan tidak dicentang supaya kunci ini bisa dipakai dari komputermu. Kalau kolom IP wajib diisi, isi <code>0.0.0.0/0</code>.</li>
+  <li>Klik <b>Save &amp; Generate Key</b>, lalu salin kuncinya. Kunci ini cuma muncul sekali, jadi jangan tutup halamannya sebelum kamu menyalinnya.</li></ol>
+  <p class="tip">Jangan kasih kunci ini ke siapa pun. Kalau sempat bocor, hapus di halaman yang sama dan buat yang baru.</p></div>
+ <div class="pg"><h2>Isi data akunmu</h2>
+  <p>Creator ID adalah nomor akunmu di Roblox. Buka profilmu, lalu lihat angka di alamat webnya, misalnya <code>roblox.com/users/1234567/profile</code>. Angkanya <b>1234567</b>. Kalau mau upload ke grup, ambil angka dari alamat halaman grupnya dan centang kotak grup di bawah.</p>
+  <div class="row">
+   <label>Creator ID (angka)<input type="text" id="cid" inputmode="numeric"></label>
+   <label>Kunci API<input type="password" id="key" autocomplete="off"></label>
+   <label class="chk"><input type="checkbox" id="grp"> ID ini milik grup (bukan akun)</label>
+   <label>Deskripsi untuk semua lagu (boleh dikosongkan)<input type="text" id="desc" maxlength="1000"></label>
+   <label class="chk"><input type="checkbox" id="shut"> Matikan komputer 90 detik setelah semua selesai (Windows)</label></div>
+  <p class="st">Data ini disimpan di komputermu saja, di file <code>pengaturan.json</code>.</p></div>
+ <div class="pg"><h2>Semua siap</h2>
+  <p>Di halaman berikutnya kamu tinggal memasukkan lagu, lalu klik <b>Mulai upload</b>. Beberapa hal yang perlu kamu tahu:</p><ul>
+  <li>Jendela hitam tempat program ini jalan jangan ditutup, dan komputer harus tetap menyala. Tab browser ini boleh ditutup.</li>
+  <li>Selama upload berjalan, komputer tidak akan masuk mode sleep.</li>
+  <li>Lagu yang gagal bisa dicoba lagi dengan tombol <b>Coba ulang yang gagal</b>.</li>
+  <li>Lagu yang berhasil akan menampilkan ID. Di Roblox Studio, ID itu dipakai dalam bentuk <code>rbxassetid://ID</code>.</li>
+  <li>Program mengecek ke Roblox tiap satu menit apakah lagunya disetujui atau ditolak. Pemeriksaannya bisa makan waktu beberapa menit sampai lebih lama.</li></ul></div>
+ <div class="bar"><button id="prev">Kembali</button><button id="next">Lanjut</button><span id="msg" role="status"></span></div>
+</section>
+<div id="app" hidden><div class="tabs"><button class="on" data-t="up">Upload</button><button data-t="his">Riwayat</button><button data-t="izin">Izin akses</button><button data-t="pl">Playlist</button></div>
+<div class="tab" id="t-up"><section class="box">
+ <label class="drop" id="drop"><input type="file" id="files" accept=".mp3,.ogg,.wav,.flac" multiple>Taruh lagu di sini, atau klik untuk memilih</label>
+ <div class="load-fade" id="uploadFade"><div id="list"></div></div><div class="bar load-controls" id="uploadMore" hidden></div>
+ <div class="prog" id="prog" hidden><i></i></div>
+ <div class="bar"><button id="start">Mulai upload</button><button id="retry">Coba ulang yang gagal</button><button id="check">Cek status di Roblox</button><span class="st" id="sum"></span><span class="st" id="msg2" role="status"></span></div>
+</section><p><button id="guide">Panduan dan pengaturan</button></p></div>
+<div class="tab" id="t-his" hidden><section class="box">
+ <details style="margin-bottom:14px"><summary>Impor lagu lama dari akunmu</summary>
+  <p class="st">Roblox tidak menyediakan cara mengambil daftar semua audio lewat kunci API. Jadi tempel ID atau link audio yang mau dimasukkan ke riwayat. ID-nya adalah angka panjang di alamat halaman audio itu di Creator Hub. Boleh banyak sekaligus, pisahkan dengan enter atau spasi. Tiap audio ditandai <b>Sama</b> atau <b>Beda akun</b> dibandingkan Creator ID di pengaturan, karena audio milik akun lain akan ditolak Roblox saat diberi izin akses.</p>
+  <textarea id="imptxt" rows="4" placeholder="123456789&#10;987654321"></textarea>
+  <div class="bar"><button id="impgo">Impor</button><span class="st" id="impmsg" role="status"></span></div></details>
+ <div class="bar" style="margin:0 0 12px"><select id="flt" aria-label="Filter"><option value="">Semua</option><option value="berhasil">Terkirim</option><option value="disetujui">Disetujui</option><option value="ditolak">Ditolak</option><option value="gagal">Gagal</option></select><button id="csv">Unduh CSV</button><span class="st" id="hmsg" role="status"></span></div>
+ <div class="tw"><table id="tb"><thead><tr><th>Waktu</th><th>Judul</th><th>Asset ID</th><th>Kirim</th><th>Roblox</th><th>Akun</th><th>Izin akses</th><th>Catatan</th><th>Aksi</th></tr></thead><tbody></tbody></table></div><p class="st" id="empty2" hidden>Belum ada riwayat.</p>
+ <div class="bar load-controls" id="historyMore" hidden></div>
+</section></div>
+<div class="tab" id="t-izin" hidden><section class="box">
+ <p>Lagu yang kamu upload bersifat privat, jadi hanya bisa dipakai akunmu. Di sini kamu bisa memberi izin supaya lagu yang sudah <b>disetujui</b> bisa dipakai komunitas, akun, atau experience tertentu.</p>
+ <p class="tip">Izin yang sudah diberikan tidak bisa dicabut lewat program ini, dan mungkin tidak bisa dicabut lewat website juga. Periksa ID-nya baik-baik.</p>
+ <p class="st">Kunci API perlu izin <b>Asset Permissions</b> (Write). Kalau belum, buka kuncinya di Creator Hub lalu tambahkan. Kalau izin kunci kurang, Roblox bisa saja membalas berhasil padahal tidak diterapkan, jadi cek juga hasilnya di Creator Hub.</p>
+ <div style="margin-top:14px">
+  <label>Cari komunitas atau akun (ketik minimal 3 huruf)<input type="text" id="tq" autocomplete="off" placeholder="nama komunitas atau username"></label>
+  <div class="res" id="res" hidden></div>
+ </div>
+ <label class="chk" style="margin-top:12px;flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="tauto"> Beri izin otomatis setiap ada lagu yang disetujui (untuk target yang dipilih berikutnya)</label>
+ <p class="st" style="margin:6px 0 0">Pilih dari hasil pencarian untuk menambahkannya ke daftar di bawah.</p>
+ <details style="margin-top:12px"><summary class="st">Masukkan ID manual (termasuk experience)</summary>
+  <div class="row" style="margin-top:10px">
+   <label>Jenis<select id="ttype"><option value="Group">Komunitas (grup)</option><option value="User">Akun</option><option value="Universe">Experience (Universe ID)</option></select></label>
+   <label>ID (angka)<input type="text" id="tid" inputmode="numeric"></label>
+   <label>Nama pengingat (boleh kosong)<input type="text" id="tname" maxlength="40"></label></div>
+  <div class="bar"><button id="tadd">Tambah target</button></div></details>
+ <div class="bar"><span class="st" id="tmsg" role="status"></span></div>
+ <div id="tlist" style="margin-top:14px"></div>
+ <h3 style="margin:22px 0 4px;font-weight:normal;font-size:1.3rem">Izin per lagu</h3>
+ <p class="st" style="margin:0">Centang lagu dan target yang mau diberi izin. Kotak di kepala kolom memilih semua lagu untuk target itu, kotak di kepala baris memilih semua target untuk lagu itu, dan kotak paling kiri atas memilih semuanya. Kotak yang terkunci berarti izinnya sudah diberikan. Lagu yang belum disetujui Roblox belum bisa dipilih.</p>
+ <p class="st" id="mxnote"></p>
+ <div class="mxw" id="mxwrap" hidden><table id="mx"><thead></thead><tbody></tbody></table></div>
+ <div class="bar load-controls" id="matrixMore" hidden></div>
+ <div class="bar"><button id="mxgo">Beri izin sesuai centang</button><span class="st" id="mxmsg" role="status"></span></div>
+ <p class="st">Universe ID bukan Place ID. Cari di Creator Hub, di halaman experience yang bersangkutan.</p>
+</section></div>
+<div class="tab" id="t-pl" hidden><section class="box">
+ <p>Susun playlist lalu simpan sebagai file <code>.lua</code> di folder <code>playlist</code> (di samping program ini). Kalau temanmu sudah punya playlist, tempel kodenya di bawah, lalu lanjutkan menambah lagu baru.</p>
+ <div class="bar" style="margin:0 0 12px"><select id="plsel" aria-label="Pilih playlist"></select><button id="plnew">Playlist baru</button><button id="pldel">Hapus playlist</button></div>
+ <details style="margin-bottom:14px"><summary>Impor dari kode Lua (misalnya dari temanmu)</summary>
+  <p class="st">Tempel seluruh kodenya, mulai dari <code>return {</code>. Program membaca DisplayName, ImageId, dan tiap lagu (Artist, Order, SongId, CustomSpeed). Urutan mengikuti Order. Hasilnya jadi playlist baru yang bisa kamu tambah dan ubah.</p>
+  <textarea id="plimp" rows="6" placeholder="return { DisplayName = ..."></textarea>
+  <div class="bar"><button id="plimpgo">Impor jadi playlist baru</button><span class="st" id="plimpmsg" role="status"></span></div></details>
+ <div id="pled" hidden>
+  <div class="row"><label>Nama playlist (DisplayName)<input type="text" id="plname" maxlength="60"></label>
+   <label>ImageId (angka atau rbxassetid://...)<input type="text" id="plimg"></label>
+   <label>Artis bawaan untuk lagu baru<input type="text" id="plart" maxlength="80"></label></div>
+  <details style="margin:14px 0" open><summary>Tambah dari lagu yang sudah kamu upload <span class="st" id="pladdn"></span></summary>
+   <div id="pladd"></div><div class="bar"><button id="pladdall">Centang semua</button><button id="pladdgo">Tambahkan yang dicentang</button></div></details>
+  <details style="margin:14px 0"><summary>Tambah manual (judul + Song ID)</summary>
+   <div class="row" style="margin-top:10px"><label>Judul<input type="text" id="plmn" maxlength="100"></label><label>Song ID<input type="text" id="plmid" inputmode="numeric"></label></div>
+   <div class="bar"><button id="plmgo">Tambah</button></div></details>
+  <p class="st" id="plcount"></p>
+  <div class="mxw"><table id="plt"><thead><tr><th>#</th><th>Judul</th><th>Artis</th><th>Song ID</th><th>Speed</th><th>Aksi</th></tr></thead><tbody></tbody></table></div>
+  <p class="st">Kolom Speed (CustomSpeed) boleh kosong. Nomor Order mengikuti urutan di tabel, jadi pakai tombol panah untuk mengatur urutan.</p>
+  <div class="bar"><button id="plsave">Simpan</button><button id="plcopy">Simpan dan salin Lua</button><button id="pldl">Simpan dan unduh .lua</button><span class="st" id="plmsg" role="status"></span></div>
+ </div></section></div>
+<dialog id="dlg"><h3>Ubah lagu</h3>
+ <label>Nama (maksimal 50 huruf)<input type="text" id="enm" maxlength="50"></label>
+ <label style="margin-top:12px">Deskripsi<textarea id="eds" rows="3" maxlength="1000"></textarea></label>
+ <p class="st">Yang bisa diubah hanya nama dan deskripsi. Isi audionya tidak bisa diganti. Kalau mau ganti lagunya, upload versi baru lalu arsipkan yang lama.</p>
+ <div class="bar"><button id="esave">Simpan ke Roblox</button><button id="ecancel">Batal</button></div></dialog></div></main>
+<script>
+const $=id=>document.getElementById(id);
+const post=(u,b)=>fetch(u,{method:'POST',headers:{'X-App':'1','Content-Type':'application/json'},body:JSON.stringify(b||{})}).then(r=>r.json());
+let sig='',loaded=false,pg=0,hasKey=false,S={queue:[],cfg:{}};
+const visible={upload:4,history:5,matrix:5};
+function say(t){$('msg').textContent=t}
+function renderMore(key,total,render){
+    const box=$(key+'More');box.innerHTML='';
+    const remaining=total-visible[key];
+    if(remaining<=0){box.hidden=true;return}
+    box.hidden=false;
+    const next=document.createElement('button');next.textContent='\u2193';next.title='Muat '+Math.min(5,remaining)+' berikutnya';next.setAttribute('aria-label',next.title);
+    next.onclick=()=>{visible[key]=Math.min(total,visible[key]+5);render()};box.appendChild(next);
+    const all=document.createElement('button');all.textContent='\u21ca';all.title='Muat semua';all.setAttribute('aria-label',all.title);
+    all.onclick=()=>{visible[key]=total;render()};box.appendChild(all);
+}
+async function refresh(){
+  const s=await (await fetch('/api/state')).json();PL=s.playlists||[];if(!plInit){plInit=true;plSel()}
+  if(!loaded){loaded=true;hasKey=s.cfg.hasKey;$('cid').value=s.cfg.creatorId;$('grp').checked=s.cfg.isGroup;$('desc').value=s.cfg.description;$('shut').checked=s.cfg.shutdown;keyHint();
+    if(!s.cfg.creatorId||!hasKey){$('wiz').hidden=false;show(0)}else{$('app').hidden=false}}
+  if(s.importMsg)$('impmsg').textContent=s.importMsg;
+  if(s.actMsg)$('hmsg').textContent=s.actMsg;
+  $('prog').hidden=!s.running;
+  const n=k=>s.queue.filter(q=>q.status==k).length;
+  const m=k=>s.queue.filter(q=>q.status=='berhasil'&&q.mod==k).length;
+  $('sum').textContent=`${n('berhasil')} terkirim (${m('disetujui')} disetujui, ${m('ditolak')} ditolak), ${n('menunggu')+n('mengupload')} antre, ${n('gagal')} gagal`+(s.running?' - sedang berjalan':'');
+    const g=s.queue.map(q=>q.id+q.status+q.note+q.moderationReason+q.assetId+q.mod+q.title+q.arsip+JSON.stringify(q.izin||{})).join('|')+JSON.stringify(s.cfg.targets||[]);
+  if(g===sig)return;sig=g;S=s;renderHis();renderT();renderM();renderPlAdd();
+    renderUpload();
+}
+function renderUpload(){
+    const items=S.queue.filter(q=>!q.imported),box=$('list');box.innerHTML='';
+    items.slice(0,visible.upload).forEach(q=>{
+    const d=document.createElement('div');d.className='it';
+    const t=document.createElement('input');t.type='text';t.value=q.title;t.maxLength=50;
+    t.onchange=()=>post('/api/title',{id:q.id,title:t.value});
+    const w=document.createElement('div');w.className='st pill '+q.status;
+    const lab={disetujui:'Disetujui Roblox',ditolak:'DITOLAK Roblox',diperiksa:'Sedang diperiksa Roblox'};
+    w.textContent=q.status==='berhasil'?'ID '+q.assetId+' - '+(lab[q.mod]||'menunggu pemeriksaan Roblox'):q.status;
+    if(q.status==='berhasil')w.className='st pill '+(q.mod==='ditolak'?'gagal':q.mod==='disetujui'?'berhasil':'mengupload');
+    if(q.note){const sm=document.createElement('small');sm.textContent=q.note;w.appendChild(sm)}
+        if(q.moderationReason){const sm=document.createElement('small');sm.textContent='Alasan Roblox: '+q.moderationReason;w.appendChild(sm)}
+    const x=document.createElement('button');x.textContent='×';x.setAttribute('aria-label','Hapus');
+    x.onclick=()=>post('/api/remove',{id:q.id}).then(refresh);
+        d.append(t,w,x);box.appendChild(d)});
+    $('uploadFade').classList.toggle('has-more',items.length>visible.upload);
+    renderMore('upload',items.length,renderUpload);
+}
+async function add(fs){
+    const files=Array.from(fs);
+    for(const f of files){await fetch('/api/add',{method:'POST',headers:{'X-App':'1','X-Name':encodeURIComponent(f.name)},body:f})}
+  sig='';refresh();
+}
+$('files').onchange=e=>{add(e.target.files);e.target.value=''};
+const dr=$('drop');
+['dragenter','dragover'].forEach(v=>dr.addEventListener(v,e=>{e.preventDefault();dr.classList.add('over')}));
+['dragleave','drop'].forEach(v=>dr.addEventListener(v,e=>{e.preventDefault();dr.classList.remove('over')}));
+dr.addEventListener('drop',e=>add(e.dataTransfer.files));
+const PG=document.querySelectorAll('.pg');
+function keyHint(){$('key').placeholder=hasKey?'Sudah tersimpan (isi lagi kalau mau ganti)':'Tempel kunci API di sini'}
+function show(n){pg=n;PG.forEach((e,i)=>e.hidden=i!==n);$('prev').hidden=n===0;$('next').textContent=n===PG.length-1?'Ke halaman upload':'Lanjut';
+  $('dots').innerHTML=[...PG].map((_,i)=>'<i class="'+(i<=n?'on':'')+'"></i>').join('');say('')}
+$('prev').onclick=()=>show(pg-1);
+$('next').onclick=async()=>{
+  if(pg===3){
+    const cid=$('cid').value.trim();
+    if(!/^\d+$/.test(cid)){say('Creator ID harus berupa angka saja.');return}
+    if(!$('key').value.trim()&&!hasKey){say('Kunci API belum diisi.');return}
+    await post('/api/config',{creatorId:cid,isGroup:$('grp').checked,description:$('desc').value,shutdown:$('shut').checked,apiKey:$('key').value});
+    hasKey=true;$('key').value='';keyHint()}
+  if(pg===PG.length-1){$('wiz').hidden=true;$('app').hidden=false;return}
+  show(pg+1)};
+$('guide').onclick=()=>{$('app').hidden=true;$('wiz').hidden=false;show(0)};
+$('start').onclick=async()=>{const r=await post('/api/start');$('msg2').textContent=r.error||'Upload berjalan. Kamu boleh tinggal tidur, tab ini boleh ditutup.';refresh()};
+$('check').onclick=async()=>{await post('/api/check');$('msg2').textContent='Mengecek ke Roblox, hasilnya muncul beberapa detik lagi.'};
+$('retry').onclick=async()=>{await post('/api/retry');sig='';refresh()};
+function izinTxt(q){const z=q.izin||{},k=Object.keys(z);if(!k.length)return '-';
+  return k.map(x=>{const a=x.split(':');return (z[x]==='ok'?'ok ':'gagal ')+({Group:'Komunitas ',User:'Akun ',Universe:'Experience '}[a[0]])+a[1]}).join(', ')}
+function renderHis(){
+  const f=$('flt').value,tb=document.querySelector('#tb tbody'),lab={disetujui:'Disetujui',ditolak:'Ditolak',diperiksa:'Diperiksa'};
+  const list=S.queue.slice().reverse().filter(q=>!f||(f==='berhasil'||f==='gagal'?q.status===f:q.mod===f));
+  tb.innerHTML='';
+    list.slice(0,visible.history).forEach((q,n)=>{
+    const tr=document.createElement('tr');tr.style.animationDelay=Math.min(n,15)*30+'ms';
+    const own=q.pemilik==='beda'?['Beda akun','gagal']:q.pemilik==='sama'?['Sama','berhasil']:['?','menunggu'];
+    const rob=q.status==='berhasil'?[lab[q.mod]||'Menunggu',q.mod==='disetujui'?'berhasil':q.mod==='ditolak'?'gagal':'mengupload']:['-',''];
+    [[q.waktu||'-'],[q.title],[q.assetId||'-'],q.arsip?['Diarsipkan','menunggu']:[q.status,q.status==='berhasil'?'berhasil':q.status==='gagal'?'gagal':'mengupload'],rob,own,[izinTxt(q)],[[q.note,q.moderationReason&&'Alasan Roblox: '+q.moderationReason].filter(Boolean).join(' - ')||'']].forEach(c=>{
+      const td=document.createElement('td');
+      if(c[1]){const sp=document.createElement('span');sp.className='pill '+c[1];sp.textContent=c[0];td.appendChild(sp)}else td.textContent=c[0];
+      tr.appendChild(td)});
+    const ac=document.createElement('td');ac.className='act';
+    if(q.status==='berhasil'&&q.assetId&&q.pemilik!=='beda'){
+      const b1=document.createElement('button');b1.textContent='Ubah';b1.onclick=()=>openEdit(q);
+      const b2=document.createElement('button');b2.textContent=q.arsip?'Pulihkan':'Arsipkan';
+      b2.onclick=async()=>{
+        if(!q.arsip&&!confirm('Lagu ini akan hilang dari website Roblox dan tidak bisa diputar di game sampai dipulihkan. Lanjut?'))return;
+        const r=await post('/api/asset/archive',{id:q.id,restore:!!q.arsip});$('hmsg').textContent=r.error||'Diproses...'};
+      ac.append(b1,b2)}else ac.textContent='-';
+    tr.appendChild(ac);
+    tb.appendChild(tr)});
+    $('empty2').hidden=list.length>0;renderMore('history',list.length,renderHis)}
+function renderT(){
+  const box=$('tlist');box.innerHTML='';
+  (S.cfg.targets||[]).forEach(t=>{
+    const d=document.createElement('div');d.className='it';d.style.gridTemplateColumns='1fr auto';
+    const TL={Group:'Komunitas ',User:'Akun ',Universe:'Experience '};const nm=TL[t.type]+t.id+(t.name?' - '+t.name:'');
+    const info=document.createElement('div');info.textContent=nm;
+    const sm=document.createElement('small'),key=t.type+':'+t.id;
+    sm.textContent=S.queue.filter(q=>(q.izin||{})[key]==='ok').length+' dari '+S.queue.filter(q=>q.status==='berhasil'&&q.mod==='disetujui').length+' lagu disetujui sudah diberi izin'+(t.auto?' - otomatis aktif':'');
+    info.appendChild(sm);
+    const bt=document.createElement('button');bt.textContent='Beri izin sekarang';
+    bt.onclick=async()=>{if(!confirm('Izin yang sudah diberikan tidak bisa dicabut lewat program ini. Beri izin ke '+nm+'?'))return;
+      const r=await post('/api/grant',{type:t.type,id:t.id});$('tmsg').textContent=r.error||'Diproses. Hasilnya muncul di tab Riwayat beberapa detik lagi.'};
+    const rm=document.createElement('button');rm.textContent='×';rm.setAttribute('aria-label','Hapus target');
+    rm.onclick=()=>post('/api/target/remove',{type:t.type,id:t.id}).then(()=>{sig='';refresh()});
+    const act=document.createElement('div');act.style.cssText='display:flex;gap:8px';act.append(bt,rm);
+    d.append(info,act);box.appendChild(d)})}
+$('tadd').onclick=async()=>{
+  const id=$('tid').value.trim();
+  if(!/^\d+$/.test(id)){$('tmsg').textContent='ID harus berupa angka.';return}
+  const auto=$('tauto').checked;
+  if(auto&&!confirm('Izin akan diberikan otomatis ke setiap lagu yang disetujui, dan tidak bisa dicabut lewat program ini. Yakin?'))return;
+  const r=await post('/api/target/add',{type:$('ttype').value,id,name:$('tname').value.trim(),auto});
+  $('tmsg').textContent=r.error||'Target ditambahkan.';$('tid').value='';$('tname').value='';sig='';refresh()};
+async function addT(type,id,name){
+  const auto=$('tauto').checked;
+  if(auto&&!confirm('Izin akan diberikan otomatis ke setiap lagu yang disetujui, dan tidak bisa dicabut lewat program ini. Yakin?'))return;
+  const r=await post('/api/target/add',{type,id,name,auto});
+  $('tmsg').textContent=r.error||'Ditambahkan: '+name;sig='';refresh()}
+let tmr=0,seq=0;
+$('tq').oninput=()=>{
+  clearTimeout(tmr);const q=$('tq').value.trim(),box=$('res');
+  if(q.length<3){box.hidden=true;return}
+  tmr=setTimeout(async()=>{
+    const my=++seq;box.hidden=false;box.textContent='Mencari...';
+    let r;try{r=await (await fetch('/api/search?q='+encodeURIComponent(q),{headers:{'X-App':'1'}})).json()}catch(e){r={error:'Gagal mencari.'}}
+    if(my!==seq)return;
+    box.innerHTML='';
+    if(!(r.results||[]).length){box.textContent=r.error||'Tidak ada hasil.';return}
+    r.results.forEach(x=>{
+      const b=document.createElement('button');b.type='button';b.className='rs';
+      const im=document.createElement('img');im.alt='';if(x.icon)im.src=x.icon;
+      const t=document.createElement('span');t.textContent=x.name;
+      const sb=document.createElement('small');sb.textContent=x.sub;t.appendChild(sb);
+      b.append(im,t);
+      b.onclick=()=>{box.hidden=true;$('tq').value='';addT(x.type,x.id,x.name)};
+      box.appendChild(b)})},400)};
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));
+  ['up','his','izin','pl'].forEach(t=>$('t-'+t).hidden=t!==b.dataset.t);renderHis();renderT();renderM()});
+const pick=new Set();
+const TLB={Group:'Komunitas ',User:'Akun ',Universe:'Experience '};
+const elig=q=>q.status==='berhasil'&&q.mod==='disetujui'&&q.pemilik!=='beda'&&!q.arsip&&q.assetId;
+const tkey=t=>t.type+':'+t.id;
+function chk(list,cb){const c=document.createElement('input');c.type='checkbox';c.disabled=!list.length;c.checked=list.length>0&&list.every(k=>pick.has(k));
+  c.onchange=()=>{list.forEach(k=>c.checked?pick.add(k):pick.delete(k));renderM()};if(cb)cb(c);return c}
+function renderM(){
+  const T=S.cfg.targets||[],songs=S.queue.filter(q=>q.status==='berhasil'&&q.assetId).slice().reverse();
+  const th=document.querySelector('#mx thead'),tb=document.querySelector('#mx tbody');
+  th.innerHTML='';tb.innerHTML='';
+  $('mxnote').textContent=!T.length?'Tambahkan target dulu di atas.':!songs.length?'Belum ada lagu yang terkirim.':'';
+  $('mxwrap').hidden=!T.length||!songs.length;
+    if(!T.length||!songs.length){$('matrixMore').hidden=true;return}
+  const open=(q,t)=>elig(q)&&(q.izin||{})[tkey(t)]!=='ok';
+  const all=[];songs.forEach(q=>T.forEach(t=>{if(open(q,t))all.push(q.id+'|'+tkey(t))}));
+  const hr=document.createElement('tr'),h0=document.createElement('th');
+  h0.append(chk(all),' Semua');hr.appendChild(h0);
+  const h1=document.createElement('th');h1.textContent='Lagu';hr.appendChild(h1);
+  T.forEach(t=>{const h=document.createElement('th');
+    h.append(chk(songs.filter(q=>open(q,t)).map(q=>q.id+'|'+tkey(t))),' '+TLB[t.type]+(t.name||t.id));hr.appendChild(h)});
+  th.appendChild(hr);
+    songs.slice(0,visible.matrix).forEach(q=>{
+    const tr=document.createElement('tr'),a=document.createElement('td');
+    a.appendChild(chk(T.filter(t=>open(q,t)).map(t=>q.id+'|'+tkey(t))));tr.appendChild(a);
+    const n=document.createElement('td');n.textContent=q.title;
+    if(!elig(q)){const sm=document.createElement('small');
+      sm.textContent=q.arsip?'diarsipkan':q.pemilik==='beda'?'beda akun':q.mod==='ditolak'?'ditolak Roblox':'menunggu persetujuan Roblox';n.appendChild(sm)}
+    tr.appendChild(n);
+    T.forEach(t=>{
+      const td=document.createElement('td'),c=document.createElement('input'),k=q.id+'|'+tkey(t),z=(q.izin||{})[tkey(t)];
+      c.type='checkbox';td.appendChild(c);
+      if(z==='ok'){c.checked=true;c.disabled=true;td.title='Izin sudah diberikan'}
+      else if(!elig(q)){c.disabled=true}
+      else{c.checked=pick.has(k);c.onchange=()=>{c.checked?pick.add(k):pick.delete(k);renderM()};
+        if(z){td.title=z;td.style.color='var(--bad)';td.append(' !')}}
+      tr.appendChild(td)});
+        tb.appendChild(tr)});
+    renderMore('matrix',songs.length,renderM)}
+$('mxgo').onclick=async()=>{
+  const grants=[];
+  (S.cfg.targets||[]).forEach(t=>{
+    const items=S.queue.filter(q=>elig(q)&&(q.izin||{})[tkey(t)]!=='ok'&&pick.has(q.id+'|'+tkey(t))).map(q=>q.id);
+    if(items.length)grants.push({type:t.type,id:t.id,items})});
+  const n=grants.reduce((a,g)=>a+g.items.length,0);
+  if(!n){$('mxmsg').textContent='Belum ada yang dicentang.';return}
+  if(!confirm('Izin yang sudah diberikan tidak bisa dicabut lewat program ini. Beri '+n+' izin sesuai centang?'))return;
+  const r=await post('/api/grant-select',{grants});
+  if(r.error){$('mxmsg').textContent=r.error;return}
+  pick.clear();$('mxmsg').textContent='Diproses. Kotak akan terkunci satu per satu kalau berhasil.';renderM()};
+let editing=null;
+function openEdit(q){editing=q;$('enm').value=q.title;$('eds').value=q.desc||'';$('dlg').showModal()}
+$('esave').onclick=async()=>{
+  if(!editing)return;
+  const r=await post('/api/asset/update',{id:editing.id,title:$('enm').value.trim(),desc:$('eds').value});
+  $('hmsg').textContent=r.error||'Menyimpan perubahan ke Roblox...';$('dlg').close()};
+$('ecancel').onclick=()=>$('dlg').close();
+$('flt').onchange=()=>{visible.history=5;renderHis()};
+$('impgo').onclick=async()=>{const r=await post('/api/import',{text:$('imptxt').value});$('impmsg').textContent=r.error||'Diproses...';if(!r.error)$('imptxt').value=''};
+$('csv').onclick=()=>{
+    const rows=[['Waktu','Judul','File','Asset ID','Status kirim','Status Roblox','Akun','Izin akses','Catatan']].concat(S.queue.map(q=>[q.waktu||'',q.title,q.file,q.assetId||'',q.status,q.mod||'',q.pemilik||'',izinTxt(q),[q.note,q.moderationReason&&'Alasan Roblox: '+q.moderationReason].filter(Boolean).join(' - ')]));
+  const csv='\ufeff'+rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='riwayat-upload.csv';a.click()};
+let PL=[],plInit=false,ed=null;const plPick=new Set();
+function plSel(v){const s=$('plsel');s.innerHTML='';s.add(new Option('- pilih playlist -',''));PL.forEach(p=>s.add(new Option(p.name+' ('+p.songs.length+' lagu)',p.id)));s.value=v||''}
+function plMsg(t){$('plmsg').textContent=t}
+function loadEd(id){const p=PL.find(x=>x.id===id);plPick.clear();
+  if(!p){ed=null;$('pled').hidden=true;return}
+  ed=JSON.parse(JSON.stringify(p));$('pled').hidden=false;
+  $('plname').value=ed.name;$('plimg').value=ed.image||'';$('plart').value=ed.artist||'Fari Noveri';renderPl()}
+async function plReload(id){const s=await (await fetch('/api/state')).json();PL=s.playlists||[];plSel(id);loadEd(id)}
+$('plsel').onchange=()=>loadEd($('plsel').value);
+$('plnew').onclick=()=>{ed={id:'',name:'',image:'',artist:'Fari Noveri',songs:[]};plPick.clear();$('plsel').value='';$('pled').hidden=false;
+  $('plname').value='';$('plimg').value='';$('plart').value=ed.artist;plMsg('');renderPl()};
+$('plname').oninput=()=>{if(ed)ed.name=$('plname').value};
+$('plimg').oninput=()=>{if(ed)ed.image=$('plimg').value};
+$('plart').oninput=()=>{if(ed)ed.artist=$('plart').value};
+function mv(i,d){const j=i+d;if(j<0||j>=ed.songs.length)return;[ed.songs[i],ed.songs[j]]=[ed.songs[j],ed.songs[i]];renderPl()}
+function renderPl(){
+  if(!ed)return;const tb=document.querySelector('#plt tbody');tb.innerHTML='';
+  ed.songs.forEach((s,i)=>{
+    const tr=document.createElement('tr');
+    const cell=el=>{const td=document.createElement('td');td.appendChild(el);tr.appendChild(td)};
+    const inp=(key,w,val)=>{const e=document.createElement('input');e.type='text';e.value=val;e.style.width=w;e.oninput=()=>{s[key]=e.value};return e};
+    const no=document.createElement('span');no.textContent=i+1;cell(no);
+    cell(inp('name','300px',s.name));cell(inp('artist','150px',s.artist||''));cell(inp('songId','160px',s.songId));cell(inp('speed','70px',s.speed==null?'':s.speed));
+    const mk=(t,fn,lab)=>{const b=document.createElement('button');b.textContent=t;b.setAttribute('aria-label',lab);b.onclick=fn;return b};
+    const ac=document.createElement('td');ac.className='act';
+    ac.append(mk('\u2191',()=>mv(i,-1),'Naik'),mk('\u2193',()=>mv(i,1),'Turun'),mk('\u00d7',()=>{ed.songs.splice(i,1);renderPl()},'Hapus'));
+    tr.appendChild(ac);tb.appendChild(tr)});
+  $('plcount').textContent=ed.songs.length+' lagu di playlist ini';
+  renderPlAdd()}
+function renderPlAdd(){
+  const box=$('pladd');box.innerHTML='';if(!ed)return;
+  const have=new Set(ed.songs.map(s=>String(s.songId)));
+  const lab={disetujui:'disetujui',ditolak:'DITOLAK',diperiksa:'diperiksa'};
+  const list=S.queue.filter(q=>q.status==='berhasil'&&q.assetId&&!q.arsip&&q.pemilik!=='beda'&&!have.has(String(q.assetId))).slice().reverse();
+  $('pladdn').textContent=list.length?'('+list.length+' tersedia)':'(tidak ada lagu baru)';
+  list.slice(0,300).forEach(q=>{const l=document.createElement('label');l.className='chk';
+    const c=document.createElement('input');c.type='checkbox';c.dataset.id=q.id;c.checked=plPick.has(q.id);
+    c.onchange=()=>{c.checked?plPick.add(q.id):plPick.delete(q.id)};
+    l.append(c,' '+q.title+' - ID '+q.assetId+' ('+(lab[q.mod]||'menunggu')+')');box.appendChild(l)})}
+$('pladdall').onclick=()=>$('pladd').querySelectorAll('input').forEach(c=>{c.checked=true;plPick.add(c.dataset.id)});
+$('pladdgo').onclick=()=>{if(!ed)return;const art=$('plart').value;
+  S.queue.filter(q=>plPick.has(q.id)).forEach(q=>ed.songs.push({name:q.title,artist:art,songId:String(q.assetId),speed:null,extra:{}}));
+  plPick.clear();renderPl()};
+$('plmgo').onclick=()=>{if(!ed)return;const n=$('plmn').value.trim(),id=$('plmid').value.trim();
+  if(!n||!/^\d+$/.test(id)){plMsg('Isi judul dan Song ID (angka).');return}
+  ed.songs.push({name:n,artist:$('plart').value,songId:id,speed:null,extra:{}});$('plmn').value='';$('plmid').value='';plMsg('');renderPl()};
+async function plSave(){
+  if(!ed)return null;ed.name=$('plname').value.trim();
+  if(!ed.name){plMsg('Isi nama playlist dulu.');return null}
+  const r=await post('/api/pl/save',ed);
+  if(r.error){plMsg(r.error);return null}
+  await plReload(r.id);
+  plMsg('Tersimpan di '+r.file+(r.skipped?' ('+r.skipped+' baris tidak valid dilewati)':''));return r}
+$('plsave').onclick=plSave;
+$('plcopy').onclick=async()=>{const r=await plSave();if(!r)return;
+  try{await navigator.clipboard.writeText(r.lua);plMsg('Lua tersalin ke clipboard dan tersimpan di '+r.file)}catch(e){plMsg('Gagal menyalin. Buka saja file '+r.file)}};
+$('pldl').onclick=async()=>{const r=await plSave();if(!r)return;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([r.lua],{type:'text/plain'}));a.download=r.file.split('/').pop();a.click()};
+$('pldel').onclick=async()=>{const id=$('plsel').value;if(!id)return;
+  if(!confirm('Hapus playlist ini beserta file .lua-nya?'))return;
+  await post('/api/pl/delete',{id});ed=null;await plReload('')};
+$('plimpgo').onclick=async()=>{const r=await post('/api/pl/import',{text:$('plimp').value});
+  if(r.error){$('plimpmsg').textContent=r.error;return}
+  $('plimp').value='';$('plimpmsg').textContent='Terimpor '+r.count+' lagu. Tinggal tambahkan lagu baru lalu simpan.';await plReload(r.id)};
+(function(){const b=$('petals');for(let i=0;i<14;i++){const p=document.createElement('span');
+  p.style.left=Math.random()*100+'%';p.style.animationDuration=(10+Math.random()*12)+'s';p.style.animationDelay=(-Math.random()*20)+'s';
+  p.style.setProperty('--dx',(Math.random()*160-80)+'px');b.appendChild(p)}})();
+refresh();setInterval(refresh,2000);
+</script></body></html>
