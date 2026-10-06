@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Fari Uploader — Admin Lisensi</title>
+  <style>
+    :root{color-scheme:dark;--bg:#10070a;--panel:#1a0b0f;--panel2:#241014;--ink:#f8eff0;--muted:#b49fa3;--line:#47212a;--red:#ff3448;--ok:#9de0ad;--bad:#ff8d98}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -20%,#47121c 0,transparent 48%),var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",Arial,sans-serif}
+    main{max-width:1100px;margin:auto;padding:36px 22px 80px}.brand{display:flex;align-items:center;gap:16px;margin-bottom:28px}.mark{width:52px;height:52px;display:grid;place-items:center;border:1px solid var(--red);background:var(--panel);color:var(--red);font:bold 27px Georgia,serif;box-shadow:0 0 24px #ff344822}.eyebrow{margin:0;color:var(--red);font-size:11px;font-weight:700;letter-spacing:.16em}.brand h1{margin:2px 0 0;font:700 27px Georgia,serif}.card{border:1px solid var(--line);border-radius:12px;background:linear-gradient(160deg,#1d0c11,var(--panel));padding:20px;margin:16px 0;box-shadow:0 14px 34px #0004}.card h2{margin:0 0 14px;font:600 19px Georgia,serif}.sub{color:var(--muted);font-size:13px;margin:3px 0 15px}.row{display:flex;gap:12px;align-items:end;flex-wrap:wrap}label{display:grid;gap:5px;flex:1 1 170px;color:var(--muted);font-size:12px}input{width:100%;border:1px solid var(--line);border-radius:7px;background:#0b0507;color:var(--ink);padding:10px;font:inherit}input:focus{outline:2px solid #ff344866;border-color:var(--red)}button{border:1px solid var(--red);border-radius:7px;padding:10px 15px;background:#6a1521;color:var(--ink);font:600 13px "Segoe UI",Arial,sans-serif;cursor:pointer}button:hover{background:var(--red)}button.secondary{border-color:var(--line);background:var(--panel2)}button.danger{border-color:#9a3040;background:#42121a}button:disabled{opacity:.5;cursor:not-allowed}.notice{min-height:22px;margin:12px 0 0;color:var(--muted);font-size:13px}.notice.error{color:var(--bad)}.notice.success{color:var(--ok)}.token-row{display:flex;gap:9px;align-items:center}.token-row input{flex:1}.token-row button{white-space:nowrap}.created{display:none;padding:14px;margin-top:14px;border:1px solid #568865;background:#132019;border-radius:8px}.created code{display:block;overflow-wrap:anywhere;color:var(--ok);margin:7px 0}.scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:780px;font-size:13px}th,td{text-align:left;vertical-align:top;padding:11px 9px;border-bottom:1px solid #ffffff12}th{color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.06em}td small{display:block;color:var(--muted);margin-top:4px}.pill{display:inline-block;border:1px solid var(--line);border-radius:99px;padding:2px 9px;font-size:11px}.pill.good{color:var(--ok)}.pill.bad{color:var(--bad)}.actions{white-space:nowrap}.actions button{padding:5px 9px;font-size:11px}.privacy{border-left:2px solid var(--red);padding:8px 12px;color:var(--muted);font-size:12px}footer{margin-top:24px;color:#806e72;font-size:12px}
+    @media(max-width:600px){main{padding:24px 14px}.card{padding:15px}.brand h1{font-size:22px}.token-row{align-items:stretch;flex-direction:column}.token-row button{width:100%}}
+  </style>
+</head>
+<body>
+<main>
+  <header class="brand">
+    <div class="mark" aria-hidden="true">F</div>
+    <div><p class="eyebrow">FARI NOVERI · ADMIN</p><h1>Manajemen Lisensi</h1></div>
+  </header>
+
+  <section class="card" aria-labelledby="auth-title">
+    <h2 id="auth-title">Akses administrator</h2>
+    <p class="sub">Token admin disimpan hanya di sesi tab ini dan tidak pernah disimpan di halaman.</p>
+    <div class="token-row">
+      <label>ADMIN_TOKEN<input id="token" type="password" autocomplete="current-password" spellcheck="false"></label>
+      <button id="connect" type="button">Sambungkan</button>
+    </div>
+    <p id="auth-message" class="notice" role="status"></p>
+  </section>
+
+  <section id="workspace" hidden>
+    <section class="card" aria-labelledby="create-title">
+      <h2 id="create-title">Buat lisensi</h2>
+      <div class="row">
+        <label>Nama pemegang / catatan<input id="label" maxlength="80" placeholder="Contoh: Pengguna 001"></label>
+        <label>Masa berlaku (hari)<input id="days" type="number" min="1" max="3650" value="365"></label>
+        <label>Batas perangkat<input id="devices" type="number" min="1" max="20" value="1"></label>
+        <button id="create" type="button">Buat key</button>
+      </div>
+      <div id="created" class="created" aria-live="polite">
+        <strong>Salin key sekarang; key lengkap hanya ditampilkan sekali.</strong>
+        <code id="new-key"></code>
+        <button id="copy" class="secondary" type="button">Salin key</button>
+      </div>
+      <p id="create-message" class="notice" role="status"></p>
+    </section>
+
+    <section class="card" aria-labelledby="list-title">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <div><h2 id="list-title">Lisensi & aktivasi perangkat</h2><p class="sub">Creator ID di bawah ini dikirim pengguna dan belum diverifikasi oleh Roblox.</p></div>
+        <button id="refresh" class="secondary" type="button">Muat ulang</button>
+      </div>
+      <p class="privacy">Data yang ditampilkan berasal dari persetujuan pengguna: ID instalasi acak (bukan fingerprint hardware), IP koneksi yang diterima Cloudflare, serta Creator ID yang dimasukkan sendiri. Tentukan masa simpan data dan hapus data yang tidak lagi dibutuhkan.</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>PEMEGANG</th><th>STATUS</th><th>BERLAKU SAMPAI</th><th>ID INSTALASI</th><th>IP TERAKHIR</th><th>CREATOR ID (KLAIM)</th><th>TERAKHIR AKTIF</th><th></th></tr></thead>
+          <tbody id="rows"><tr><td colspan="8">Sambungkan untuk melihat data.</td></tr></tbody>
+        </table>
+      </div>
+      <p id="list-message" class="notice" role="status"></p>
+    </section>
+  </section>
+  <footer>Akses panel menggunakan HTTPS dan token admin Cloudflare Worker.</footer>
+</main>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const token = $("token");
+  const authMessage = $("auth-message");
+  const workspace = $("workspace");
+  let newKey = "";
+
+  function setMessage(element, text, type = "") {
+    element.textContent = text;
+    element.className = "notice" + (type ? " " + type : "");
+  }
+
+  async function api(path, options = {}) {
+    const response = await fetch(path, {
+      ...options,
+      headers: {
+        Authorization: "Bearer " + token.value.trim(),
+        ...(options.body ? { "Content-Type": "application/json" } : {}),
+        ...options.headers,
+      },
+      cache: "no-store",
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "Permintaan gagal.");
+    return result;
+  }
+
+  function addCell(row, value, note = "") {
+    const cell = document.createElement("td");
+    cell.textContent = value || "—";
+    if (note) {
+      const small = document.createElement("small");
+      small.textContent = note;
+      cell.appendChild(small);
+    }
+    row.appendChild(cell);
+  }
+
+  async function refresh() {
+    setMessage($("list-message"), "Memuat data...");
+    try {
+      const result = await api("/api/admin/licenses");
+      const rows = $("rows");
+      rows.replaceChildren();
+      if (!result.licenses.length) {
+        const row = document.createElement("tr");
+        addCell(row, "Belum ada lisensi.", "");
+        rows.appendChild(row);
+      }
+      for (const license of result.licenses) {
+        const row = document.createElement("tr");
+        addCell(row, license.label, "Dibuat: " + new Date(license.created_at).toLocaleString());
+        const statusCell = document.createElement("td");
+        const pill = document.createElement("span");
+        const active = license.active === 1 && Date.parse(license.expires_at) > Date.now();
+        pill.className = "pill " + (active ? "good" : "bad");
+        pill.textContent = active ? "Aktif" : license.active === 1 ? "Kedaluwarsa" : "Dicabut";
+        statusCell.appendChild(pill);
+        statusCell.appendChild(document.createElement("br"));
+        const usage = document.createElement("small");
+        usage.textContent = "Perangkat: " + license.device_count + "/" + license.max_devices;
+        statusCell.appendChild(usage);
+        row.appendChild(statusCell);
+        addCell(row, new Date(license.expires_at).toLocaleString());
+        addCell(row, license.install_id, license.first_seen ? "Aktivasi: " + new Date(license.first_seen).toLocaleString() : "");
+        addCell(row, license.ip_address);
+        addCell(row, license.creator_id, license.creator_id ? "Belum diverifikasi oleh Roblox" : "Belum diisi");
+        addCell(row, license.last_seen ? new Date(license.last_seen).toLocaleString() : "Belum pernah");
+        const actions = document.createElement("td");
+        actions.className = "actions";
+        if (license.install_id) {
+          const reset = document.createElement("button");
+          reset.className = "secondary";
+          reset.type = "button";
+          reset.textContent = "Reset perangkat";
+          reset.addEventListener("click", async () => {
+            if (!confirm("Hapus ID instalasi, IP, dan Creator ID tercatat untuk perangkat ini? Slot lisensi akan tersedia lagi.")) return;
+            try {
+              await api(
+                "/api/admin/licenses/" + encodeURIComponent(license.id) +
+                "/devices/" + encodeURIComponent(license.install_id) + "/reset",
+                { method: "POST" },
+              );
+              await refresh();
+            } catch (error) {
+              setMessage($("list-message"), error.message, "error");
+            }
+          });
+          actions.appendChild(reset);
+        }
+        const statusAction = document.createElement("button");
+        statusAction.className = license.active === 1 ? "danger" : "secondary";
+        statusAction.type = "button";
+        statusAction.textContent = license.active === 1 ? "Cabut" : "Aktifkan";
+        statusAction.addEventListener("click", async () => {
+          const action = license.active === 1 ? "revoke" : "activate";
+          if (!confirm((action === "revoke" ? "Cabut " : "Aktifkan ") + license.label + "?")) return;
+          try {
+            await api("/api/admin/licenses/" + encodeURIComponent(license.id) + "/" + action, { method: "POST" });
+            await refresh();
+          } catch (error) {
+            setMessage($("list-message"), error.message, "error");
+          }
+        });
+        statusAction.style.marginLeft = "5px";
+        actions.appendChild(statusAction);
+        const remove = document.createElement("button");
+        remove.className = "danger";
+        remove.type = "button";
+        remove.textContent = "Hapus";
+        remove.style.marginLeft = "5px";
+        remove.addEventListener("click", async () => {
+          if (!confirm("Hapus permanen lisensi dan seluruh data perangkatnya?")) return;
+          try {
+            await api("/api/admin/licenses/" + encodeURIComponent(license.id) + "/delete", { method: "POST" });
+            await refresh();
+          } catch (error) {
+            setMessage($("list-message"), error.message, "error");
+          }
+        });
+        actions.appendChild(remove);
+        row.appendChild(actions);
+        rows.appendChild(row);
+      }
+      setMessage($("list-message"), result.licenses.length + " lisensi dimuat.", "success");
+    } catch (error) {
+      setMessage($("list-message"), error.message, "error");
+    }
+  }
+
+  $("connect").addEventListener("click", async () => {
+    if (!token.value.trim()) {
+      setMessage(authMessage, "Masukkan token admin.", "error");
+      return;
+    }
+    try {
+      await api("/api/admin/licenses");
+      sessionStorage.setItem("fari-admin-token", token.value.trim());
+      workspace.hidden = false;
+      setMessage(authMessage, "Terhubung ke server lisensi.", "success");
+      await refresh();
+    } catch (error) {
+      workspace.hidden = true;
+      setMessage(authMessage, error.message, "error");
+    }
+  });
+
+  $("create").addEventListener("click", async () => {
+    setMessage($("create-message"), "Membuat lisensi...");
+    $("created").style.display = "none";
+    try {
+      const result = await api("/api/admin/licenses", {
+        method: "POST",
+        body: JSON.stringify({
+          label: $("label").value,
+          daysValid: Number($("days").value),
+          maxDevices: Number($("devices").value),
+        }),
+      });
+      newKey = result.licenseKey;
+      $("new-key").textContent = newKey;
+      $("created").style.display = "block";
+      $("label").value = "";
+      setMessage($("create-message"), "Lisensi berhasil dibuat.", "success");
+      await refresh();
+    } catch (error) {
+      setMessage($("create-message"), error.message, "error");
+    }
+  });
+
+  $("copy").addEventListener("click", async () => {
+    if (!newKey) return;
+    try {
+      await navigator.clipboard.writeText(newKey);
+      setMessage($("create-message"), "Key disalin. Simpan dengan aman; key tidak dapat dilihat lagi.", "success");
+    } catch {
+      setMessage($("create-message"), "Salin key yang tampil secara manual dan simpan dengan aman.", "error");
+    }
+  });
+  $("refresh").addEventListener("click", refresh);
+
+  const savedToken = sessionStorage.getItem("fari-admin-token");
+  if (savedToken) token.value = savedToken;
+})();
+</script>
+</body>
+</html>

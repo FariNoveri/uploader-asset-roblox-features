@@ -1,0 +1,14 @@
+name = "fari-uploader-license"
+main = "src/worker.js"
+compatibility_date = "2026-10-06"
+workers_dev = true
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "fari-uploader-licenses"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"

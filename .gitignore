@@ -4,3 +4,16 @@
 !app-manifest.json
 !README.md
 !LICENSE
+!src/
+src/*
+!src/license-service/
+src/license-service/*
+!src/license-service/README.md
+!src/license-service/schema.sql
+!src/license-service/wrangler.toml
+!src/license-service/src/
+src/license-service/src/*
+!src/license-service/src/worker.js
+!src/license-service/public/
+src/license-service/public/*
+!src/license-service/public/admin.html

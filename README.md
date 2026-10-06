@@ -1,26 +1,21 @@
 # Fari Uploader website
 
-This repository contains the HTML page downloaded by the Fari Uploader launcher.
-The page is intended to be served locally by the desktop application because it
-uses the uploader's local API. Opening the page directly from GitHub Pages does
-not start the uploader backend.
+This repository contains the website downloaded by the Fari Uploader desktop
+application. The page is served locally by the application because it uses a
+local uploader API; opening it directly on GitHub Pages does not start the
+uploader service.
 
-## Launcher configuration
+The `src/license-service` directory contains the separate Cloudflare Worker,
+D1 schema, and protected administration panel. Follow its README to deploy the
+license API and open the admin panel at `/admin`. The Worker admin token is a
+Cloudflare secret and must never be committed.
 
-The launcher fetches `app-manifest.json` from this repository's `main` branch.
-The manifest contains the website version, minimum supported launcher version,
-credit, license, download URL, and SHA-256 checksum. Update the checksum whenever
-`index.html` changes.
+Once the Worker is deployed, set its HTTPS `workers.dev` base URL as
+`licenseApiUrl` in `app-manifest.json`. The desktop launcher checks the
+license with that server before downloading the website. It requests explicit
+consent before sending the license key, a random installation ID, connection
+IP, and the Creator ID entered by the user. The Creator ID is not verified as
+an account identity by Roblox.
 
-## Build the Windows executable
-
-From the project folder, install PyInstaller and build the launcher:
-
-```powershell
-py -m pip install pyinstaller
-py -m PyInstaller --noconfirm --clean --onefile --windowed --name FariUploader launcher.py
-```
-
-The executable is created at `dist/FariUploader.exe`. The launcher downloads and
-validates the website at startup, then starts the local uploader service and
-opens it in the default browser.
+Keep the desktop EXE open while using the uploader; closing it stops the local
+service and website.
