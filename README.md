@@ -11,11 +11,33 @@ license API and open the admin panel at `/admin`. The Worker admin token is a
 Cloudflare secret and must never be committed.
 
 Once the Worker is deployed, set its HTTPS `workers.dev` base URL as
-`licenseApiUrl` in `app-manifest.json`. The desktop launcher checks the
-license with that server before downloading the website. It requests explicit
-consent before sending the license key, a random installation ID, connection
-IP, and the Creator ID entered by the user. The Creator ID is not verified as
-an account identity by Roblox.
+`licenseApiUrl` in `app-manifest.json` and rebuild the release EXE.
+
+The EXE bundles the Python launcher/backend, webpage, manifest, and icon. A user
+only needs `FariUploader.exe`; they do not need to prepare or keep `.py`, `.html`,
+or configuration files beside it. The application creates its own persistent
+settings, license data, playlists, logs, song folder, and upload queue under
+`%LOCALAPPDATA%\FariUploader`. Those working files are kept locally so uploads
+and settings persist between runs.
+
+The launcher requires explicit consent before sending the license key, a random
+installation ID, connection IP, and the Creator ID entered by the user to the
+license service. The Creator ID is not verified as an account identity by Roblox.
 
 Keep the desktop EXE open while using the uploader; closing it stops the local
 service and website.
+
+## Build the single-file Windows release
+
+From the project root:
+
+```powershell
+magick -background none src\app-icon.svg -define icon:auto-resize=256,128,64,48,32,16 FariUploader.ico
+pyinstaller --noconfirm --clean --onefile --windowed --distpath . --workpath src\build --specpath src --icon ..\FariUploader.ico --add-data "..\index.html;." --add-data "..\app-manifest.json;." --name FariUploader-Portable src\launcher.py
+```
+
+`FariUploader-Portable.exe` is the only application file to distribute.
+`--windowed` suppresses the developer console, and `--onefile` bundles Python
+and its assets into the EXE. PyInstaller extracts its private runtime payload
+to a temporary directory while the app is running; users do not need to manage
+that directory.
