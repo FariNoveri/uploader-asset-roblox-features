@@ -39,14 +39,15 @@ wrangler deploy
 
 Use a randomly generated token with at least 32 characters. Keep it private and
 never put it in Git, the HTML, or the EXE. After deployment, copy the Worker URL
-(for example `https://fari-uploader-license.<your-subdomain>.workers.dev`) to
-the `licenseApiUrl` field in the root `app-manifest.json` and publish that
-manifest. The launcher deliberately refuses a non-HTTPS or non-Workers.dev
-license endpoint.
+`https://fari-uploader-license.cahayalunamaharani1.workers.dev` into the
+`licenseApiUrl` field in the root `app-manifest.json` and publish that manifest
+whenever changing Worker account/hostname. The launcher deliberately refuses
+a non-HTTPS or non-Workers.dev license endpoint.
 
-Open `https://<your-worker>.workers.dev/admin`, enter the admin token, and create
-license keys. Give each generated key to its intended user through a private
-channel. Revoking a license blocks subsequent launches; an already open local
-application remains active until it is closed. The panel can permanently delete
-a license and its recorded activation details when they are no longer needed,
-or reset a recorded device activation to release its device slot.
+Open `https://fari-uploader-license.cahayalunamaharani1.workers.dev/admin`,
+enter the admin token, and create license keys. Give each generated key to its
+intended user through a private channel. Revoking a license blocks subsequent
+launches; an already open local application remains active until it is closed.
+The panel can permanently delete a license and its recorded activation details
+when they are no longer needed, or reset a recorded device activation to release
+its device slot.
