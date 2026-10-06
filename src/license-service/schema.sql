@@ -5,7 +5,10 @@ CREATE TABLE IF NOT EXISTS licenses (
     active INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0, 1)),
     max_devices INTEGER NOT NULL DEFAULT 1 CHECK (max_devices BETWEEN 1 AND 20),
     expires_at TEXT NOT NULL,
-    created_at TEXT NOT NULL
+    created_at TEXT NOT NULL,
+    creator_id TEXT NOT NULL DEFAULT '',
+    creator_is_group INTEGER NOT NULL DEFAULT 0 CHECK (creator_is_group IN (0, 1)),
+    profile_locked INTEGER NOT NULL DEFAULT 0 CHECK (profile_locked IN (0, 1))
 );
 
 CREATE TABLE IF NOT EXISTS activations (

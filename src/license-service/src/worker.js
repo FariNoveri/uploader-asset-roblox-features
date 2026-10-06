@@ -1,4 +1,4 @@
-const CONSENT_VERSION = "2026-10-06-v1";
+const CONSENT_VERSION = "2026-10-06-v3";
 const MAX_REQUEST_BYTES = 16 * 1024;
 const INSTALL_ID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -95,7 +95,8 @@ function validProfile(data) {
     typeof data.installId === "string" &&
     INSTALL_ID_PATTERN.test(data.installId) &&
     typeof data.creatorId === "string" &&
-    (data.creatorId === "" || /^\d{1,30}$/.test(data.creatorId))
+    (data.creatorId === "" || /^\d{1,30}$/.test(data.creatorId)) &&
+    typeof data.isGroup === "boolean"
   );
 }
 
@@ -115,7 +116,8 @@ async function validateLicense(request, env) {
 
   const keyHash = await sha256(data.licenseKey);
   const license = await env.DB.prepare(
-    "SELECT id, active, max_devices, expires_at FROM licenses WHERE key_hash = ?",
+    `SELECT id, active, max_devices, expires_at, creator_id, creator_is_group, profile_locked
+     FROM licenses WHERE key_hash = ?`,
   )
     .bind(keyHash)
     .first();
@@ -125,6 +127,17 @@ async function validateLicense(request, env) {
   const now = new Date();
   if (Date.parse(license.expires_at) <= now.getTime()) {
     return json({ valid: false, error: "Masa berlaku lisensi sudah habis." }, 403);
+  }
+  if (
+    license.profile_locked === 1 &&
+    data.creatorId &&
+    (data.creatorId !== license.creator_id ||
+      Number(data.isGroup) !== license.creator_is_group)
+  ) {
+    return json({
+      valid: false,
+      error: "Lisensi ini sudah terikat ke akun/grup Roblox lain.",
+    }, 403);
   }
 
   const ipAddress = (request.headers.get("cf-connecting-ip") || "").slice(0, 64);
@@ -175,27 +188,69 @@ async function validateLicense(request, env) {
     valid: true,
     expiresAt: license.expires_at,
     creatorIdVerified: false,
+    accountBinding: license.profile_locked === 1
+      ? {
+          locked: true,
+          creatorId: license.creator_id,
+          isGroup: license.creator_is_group === 1,
+        }
+      : { locked: false },
   });
 }
 
 async function updateProfile(request, env) {
   const data = await readJson(request);
   if (
-    !validProfile({ ...data, consent: data?.consent, consentVersion: data?.consentVersion }) ||
+    !validProfile(data) ||
+    !data.creatorId ||
     !validLicenseKey(data?.licenseKey)
   ) {
     return json({ ok: false, error: "Permintaan profil atau persetujuan tidak valid." }, 400);
   }
   const keyHash = await sha256(data.licenseKey);
-  const license = await env.DB.prepare(
-    "SELECT active, expires_at FROM licenses WHERE key_hash = ?",
-  )
-    .bind(keyHash)
-    .first();
-  if (!license || license.active !== 1 || Date.parse(license.expires_at) <= Date.now()) {
-    return json({ ok: false, error: "Lisensi tidak aktif." }, 403);
-  }
+  const now = new Date().toISOString();
   const result = await env.DB.prepare(
+    `UPDATE licenses
+     SET creator_id = CASE WHEN profile_locked = 0 THEN ? ELSE creator_id END,
+         creator_is_group = CASE WHEN profile_locked = 0 THEN ? ELSE creator_is_group END,
+         profile_locked = 1
+     WHERE key_hash = ? AND active = 1 AND expires_at > ?
+       AND (profile_locked = 0 OR (creator_id = ? AND creator_is_group = ?))
+       AND EXISTS (
+         SELECT 1 FROM activations
+         WHERE activations.key_hash = licenses.key_hash AND install_id = ?
+       )`,
+  )
+    .bind(
+      data.creatorId,
+      Number(data.isGroup),
+      keyHash,
+      now,
+      data.creatorId,
+      Number(data.isGroup),
+      data.installId,
+    )
+    .run();
+  if (!result.meta.changes) {
+    const license = await env.DB.prepare(
+      "SELECT active, expires_at, creator_id, creator_is_group, profile_locked FROM licenses WHERE key_hash = ?",
+    ).bind(keyHash).first();
+    if (!license || license.active !== 1 || Date.parse(license.expires_at) <= Date.now()) {
+      return json({ ok: false, error: "Lisensi tidak aktif." }, 403);
+    }
+    if (
+      license.profile_locked === 1 &&
+      (license.creator_id !== data.creatorId ||
+        license.creator_is_group !== Number(data.isGroup))
+    ) {
+      return json({
+        ok: false,
+        error: "Data akun terkunci ke Creator ID dan tipe akun pertama. Lisensi ini tidak bisa dipindah ke akun lain.",
+      }, 409);
+    }
+    return json({ ok: false, error: "Aktivasi perangkat tidak ditemukan." }, 403);
+  }
+  await env.DB.prepare(
     `UPDATE activations
      SET creator_id = ?, ip_address = ?, last_seen = ?
      WHERE key_hash = ? AND install_id = ?`,
@@ -208,10 +263,15 @@ async function updateProfile(request, env) {
       data.installId,
     )
     .run();
-  if (!result.meta.changes) {
-    return json({ ok: false, error: "Instalasi lisensi tidak ditemukan." }, 403);
-  }
-  return json({ ok: true, creatorIdVerified: false });
+  return json({
+    ok: true,
+    creatorIdVerified: false,
+    accountBinding: {
+      locked: true,
+      creatorId: data.creatorId,
+      isGroup: data.isGroup,
+    },
+  });
 }
 
 async function createAdminLicense(request, env) {
@@ -254,13 +314,26 @@ async function adminApi(request, env, url) {
     const result = await env.DB.prepare(
       `SELECT l.id, l.label, l.active, l.max_devices, l.expires_at, l.created_at,
               (SELECT COUNT(*) FROM activations x WHERE x.key_hash = l.key_hash) AS device_count,
-              a.install_id, a.ip_address, a.creator_id, a.creator_verified,
+              l.creator_id, l.creator_is_group, l.profile_locked,
+              a.install_id, a.ip_address, a.creator_verified,
               a.first_seen, a.last_seen
        FROM licenses l
        LEFT JOIN activations a ON a.key_hash = l.key_hash
        ORDER BY l.created_at DESC, a.last_seen DESC`,
     ).all();
     return json({ licenses: result.results });
+  }
+  if (request.method === "GET" && url.pathname === "/api/admin/accounts") {
+    const result = await env.DB.prepare(
+      `SELECT l.id AS license_id, l.label, l.active, l.expires_at, l.profile_locked,
+              l.creator_id, l.creator_is_group, a.install_id, a.ip_address,
+              a.first_seen, a.last_seen
+       FROM licenses l
+       LEFT JOIN activations a ON a.key_hash = l.key_hash
+       WHERE l.profile_locked = 1
+       ORDER BY a.last_seen DESC, l.created_at DESC`,
+    ).all();
+    return json({ accounts: result.results });
   }
   if (request.method === "POST" && url.pathname === "/api/admin/licenses") {
     return createAdminLicense(request, env);
@@ -314,6 +387,12 @@ export default {
       if (url.pathname === "/admin" || url.pathname === "/admin/") {
         const response = await env.ASSETS.fetch(
           new Request(new URL("/admin.html", request.url)),
+        );
+        return pageResponse(response);
+      }
+      if (url.pathname === "/admin/accounts" || url.pathname === "/admin/accounts/") {
+        const response = await env.ASSETS.fetch(
+          new Request(new URL("/accounts.html", request.url)),
         );
         return pageResponse(response);
       }

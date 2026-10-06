@@ -9,6 +9,9 @@ src/*
 !src/license-service/
 src/license-service/*
 !src/license-service/README.md
+!src/license-service/migrations/
+src/license-service/migrations/*
+!src/license-service/migrations/0002_account_binding.sql
 !src/license-service/schema.sql
 !src/license-service/wrangler.toml
 !src/license-service/src/
@@ -17,3 +20,4 @@ src/license-service/src/*
 !src/license-service/public/
 src/license-service/public/*
 !src/license-service/public/admin.html
+!src/license-service/public/accounts.html

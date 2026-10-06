@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Fari Uploader — Data akun</title>
+  <style>
+    :root{color-scheme:dark;--bg:#10070a;--panel:#1a0b0f;--ink:#f8eff0;--muted:#b49fa3;--line:#47212a;--red:#ff3448;--ok:#9de0ad;--bad:#ff8d98}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -20%,#47121c 0,transparent 48%),var(--bg);color:var(--ink);font:14px/1.5 "Segoe UI",Arial,sans-serif}
+    main{max-width:1200px;margin:auto;padding:34px 22px 70px}.brand{display:flex;align-items:center;gap:15px;margin-bottom:22px}.mark{width:50px;height:50px;display:grid;place-items:center;border:1px solid var(--red);background:var(--panel);color:var(--red);font:bold 26px Georgia,serif}.eyebrow{margin:0;color:var(--red);font-size:10px;font-weight:700;letter-spacing:.15em}.brand h1{margin:2px 0 0;font:700 26px Georgia,serif}.nav{display:flex;gap:8px;margin-bottom:16px}.nav a{padding:8px 12px;border:1px solid var(--line);border-radius:7px;color:var(--ink);text-decoration:none;background:var(--panel)}.nav a[aria-current=page]{border-color:var(--red);color:#ffb8bf}.card{border:1px solid var(--line);border-radius:12px;background:linear-gradient(160deg,#1d0c11,var(--panel));padding:19px;margin:15px 0;box-shadow:0 14px 34px #0004}.card h2{margin:0 0 5px;font:600 19px Georgia,serif}.sub,.privacy,.notice{color:var(--muted);font-size:12px}.row{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.field{display:grid;gap:5px;flex:1 1 220px;color:var(--muted);font-size:12px}input{width:100%;border:1px solid var(--line);border-radius:7px;background:#0b0507;color:var(--ink);padding:10px;font:inherit}button{border:1px solid var(--red);border-radius:7px;padding:10px 15px;background:#6a1521;color:var(--ink);font:600 13px "Segoe UI",Arial,sans-serif;cursor:pointer}button:hover{background:var(--red)}.notice{min-height:20px;margin:11px 0 0}.notice.error{color:var(--bad)}.notice.good{color:var(--ok)}.privacy{border-left:2px solid var(--red);padding:8px 12px}.scroll{overflow:auto}table{width:100%;min-width:950px;border-collapse:collapse;font-size:12px}th,td{text-align:left;vertical-align:top;padding:11px 9px;border-bottom:1px solid #ffffff12}th{color:var(--muted);font-size:10px;letter-spacing:.05em}td small{display:block;color:var(--muted);margin-top:4px}.pill{display:inline-block;border:1px solid var(--line);border-radius:99px;padding:2px 9px}.pill.good{color:var(--ok)}.pill.bad{color:var(--bad)}
+    @media(max-width:600px){main{padding:23px 13px}.card{padding:14px}.brand h1{font-size:21px}}
+  </style>
+</head>
+<body>
+<main>
+  <header class="brand"><div class="mark" aria-hidden="true">F</div><div><p class="eyebrow">FARI NOVERI · ADMIN</p><h1>Data akun pengguna</h1></div></header>
+  <nav class="nav" aria-label="Admin"><a href="/admin">Lisensi</a><a href="/admin/accounts" aria-current="page">Data akun</a></nav>
+  <section class="card">
+    <h2>Akses administrator</h2>
+    <p class="sub">Gunakan ADMIN_TOKEN Worker. Token hanya disimpan di sesi tab ini.</p>
+    <div class="row"><label class="field">ADMIN_TOKEN<input id="token" type="password" autocomplete="current-password" spellcheck="false"></label><button id="connect" type="button">Sambungkan</button></div>
+    <p id="auth-message" class="notice" role="status"></p>
+  </section>
+  <section id="workspace" class="card" hidden>
+    <div class="row" style="justify-content:space-between"><div><h2>Creator ID yang terikat lisensi</h2><p class="sub">Data profil disimpan setelah pengguna menekan Simpan untuk pertama kali.</p></div><button id="refresh" type="button">Muat ulang</button></div>
+    <p class="privacy">Creator ID dan tipe akun/grup dipakai untuk mengikat lisensi pertama kali dan tidak dapat diganti ke akun lain. Creator ID adalah input pengguna dan belum diverifikasi oleh Roblox. Roblox API key tidak dikirim maupun disimpan di server lisensi. IP yang tampil adalah IP koneksi saat aktivasi terakhir.</p>
+    <div class="scroll"><table><thead><tr><th>PEMEGANG LISENSI</th><th>STATUS</th><th>CREATOR ID</th><th>JENIS</th><th>ID INSTALASI</th><th>IP TERAKHIR</th><th>PERTAMA DISIMPAN</th><th>TERAKHIR AKTIF</th></tr></thead><tbody id="rows"><tr><td colspan="8">Sambungkan untuk melihat data.</td></tr></tbody></table></div>
+    <p id="list-message" class="notice" role="status"></p>
+  </section>
+</main>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const token = $("token");
+  const workspace = $("workspace");
+  function message(node, text, type = "") { node.textContent = text; node.className = "notice" + (type ? " " + type : ""); }
+  async function api(path) {
+    const response = await fetch(path, { headers: { Authorization: "Bearer " + token.value.trim() }, cache: "no-store" });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "Permintaan gagal.");
+    return result;
+  }
+  async function refresh() {
+    message($("list-message"), "Memuat data...");
+    try {
+      const result = await api("/api/admin/accounts");
+      const rows = $("rows"); rows.replaceChildren();
+      if (!result.accounts.length) {
+        const row = document.createElement("tr"); const cell = document.createElement("td");
+        cell.colSpan = 8; cell.textContent = "Belum ada pengguna yang mengunci data akun pada lisensi."; row.appendChild(cell); rows.appendChild(row);
+      }
+      for (const account of result.accounts) {
+        const row = document.createElement("tr");
+        const cell = (value, note = "") => {
+          const td = document.createElement("td"); td.textContent = value || "—";
+          if (note) { const small = document.createElement("small"); small.textContent = note; td.appendChild(small); }
+          row.appendChild(td);
+        };
+        cell(account.label);
+        const status = document.createElement("td"), pill = document.createElement("span");
+        const active = account.active === 1 && Date.parse(account.expires_at) > Date.now();
+        pill.className = "pill " + (active ? "good" : "bad"); pill.textContent = active ? "Aktif" : account.active === 1 ? "Kedaluwarsa" : "Dicabut"; status.appendChild(pill); row.appendChild(status);
+        cell(account.creator_id, "Belum diverifikasi oleh Roblox");
+        cell(account.creator_is_group === 1 ? "Grup" : "Akun");
+        cell(account.install_id);
+        cell(account.ip_address);
+        cell(account.first_seen ? new Date(account.first_seen).toLocaleString() : "");
+        cell(account.last_seen ? new Date(account.last_seen).toLocaleString() : "");
+        rows.appendChild(row);
+      }
+      message($("list-message"), result.accounts.length + " data akun dimuat.", "good");
+    } catch (error) { message($("list-message"), error.message, "error"); }
+  }
+  $("connect").addEventListener("click", async () => {
+    try {
+      await api("/api/admin/accounts");
+      sessionStorage.setItem("fari-admin-token", token.value.trim());
+      workspace.hidden = false; message($("auth-message"), "Terhubung ke server.", "good"); await refresh();
+    } catch (error) { workspace.hidden = true; message($("auth-message"), error.message, "error"); }
+  });
+  $("refresh").addEventListener("click", refresh);
+  const saved = sessionStorage.getItem("fari-admin-token"); if (saved) token.value = saved;
+})();
+</script>
+</body>
+</html>

@@ -106,7 +106,8 @@ input[type=checkbox]{accent-color:var(--red)}
    <label class="chk"><input type="checkbox" id="grp"> ID ini milik grup (bukan akun)</label>
    <label>Deskripsi untuk semua lagu (boleh dikosongkan)<input type="text" id="desc" maxlength="1000"></label>
    <label class="chk"><input type="checkbox" id="shut"> Matikan komputer 90 detik setelah semua selesai (Windows)</label></div>
-  <p class="st">Data ini disimpan di komputermu saja, di file <code>pengaturan.json</code>.</p></div>
+  <p class="st" id="accountLockNote" hidden></p>
+  <p class="st">Creator ID dan jenis akun akan dikunci ke lisensi ini setelah disimpan pertama kali. API key tetap disimpan lokal dan tidak dikirim ke server lisensi. Creator ID/jenis akun yang disimpan dapat dilihat administrator.</p></div>
  <div class="pg"><h2>Semua siap</h2>
   <p>Di halaman berikutnya kamu tinggal memasukkan lagu, lalu klik <b>Mulai upload</b>. Beberapa hal yang perlu kamu tahu:</p><ul>
   <li>Jendela hitam tempat program ini jalan jangan ditutup, dan komputer harus tetap menyala. Tab browser ini boleh ditutup.</li>
@@ -190,6 +191,14 @@ const post=(u,b)=>fetch(u,{method:'POST',headers:{'X-App':'1','Content-Type':'ap
 let sig='',loaded=false,pg=0,hasKey=false,S={queue:[],cfg:{}};
 const visible={upload:4,history:5,matrix:5};
 function say(t){$('msg').textContent=t}
+function updateAccountLock(cfg){
+  const locked=!!cfg.accountLocked;
+  $('cid').disabled=locked;$('grp').disabled=locked;
+  $('accountLockNote').hidden=!locked;
+  $('accountLockNote').textContent=locked?
+    'Akun ini sudah dikunci oleh lisensi: Creator ID '+(cfg.lockedCreatorId||cfg.creatorId)+' ('+(cfg.lockedIsGroup?'grup':'akun')+'). Untuk memakai akun lain, gunakan lisensi lain.':
+    'Setelah disimpan, Creator ID dan jenis akun akan terikat permanen ke lisensi ini.';
+}
 function renderMore(key,total,render){
     const box=$(key+'More');box.innerHTML='';
     const remaining=total-visible[key];
@@ -204,6 +213,7 @@ async function refresh(){
   const s=await (await fetch('/api/state')).json();PL=s.playlists||[];if(!plInit){plInit=true;plSel()}
   if(!loaded){loaded=true;hasKey=s.cfg.hasKey;$('cid').value=s.cfg.creatorId;$('grp').checked=s.cfg.isGroup;$('desc').value=s.cfg.description;$('shut').checked=s.cfg.shutdown;keyHint();
     if(!s.cfg.creatorId||!hasKey){$('wiz').hidden=false;show(0)}else{$('app').hidden=false}}
+  updateAccountLock(s.cfg);
   if(s.importMsg)$('impmsg').textContent=s.importMsg;
   if(s.actMsg)$('hmsg').textContent=s.actMsg;
   $('prog').hidden=!s.running;
@@ -252,7 +262,9 @@ $('next').onclick=async()=>{
     const cid=$('cid').value.trim();
     if(!/^\d+$/.test(cid)){say('Creator ID harus berupa angka saja.');return}
     if(!$('key').value.trim()&&!hasKey){say('Kunci API belum diisi.');return}
-    await post('/api/config',{creatorId:cid,isGroup:$('grp').checked,description:$('desc').value,shutdown:$('shut').checked,apiKey:$('key').value});
+    const r=await post('/api/config',{creatorId:cid,isGroup:$('grp').checked,description:$('desc').value,shutdown:$('shut').checked,apiKey:$('key').value});
+    if(r.error){say(r.error);return}
+    updateAccountLock({accountLocked:true,lockedCreatorId:cid,lockedIsGroup:$('grp').checked});
     hasKey=true;$('key').value='';keyHint()}
   if(pg===PG.length-1){$('wiz').hidden=true;$('app').hidden=false;return}
   show(pg+1)};

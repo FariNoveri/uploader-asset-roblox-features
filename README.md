@@ -21,8 +21,12 @@ settings, license data, playlists, logs, song folder, and upload queue under
 and settings persist between runs.
 
 The launcher requires explicit consent before sending the license key, a random
-installation ID, connection IP, and the Creator ID entered by the user to the
-license service. The Creator ID is not verified as an account identity by Roblox.
+installation ID, connection IP, and the Creator ID and account/group type
+entered by the user to the license service. When the user first saves their
+account, the license locks to that Creator ID and type; another account needs
+a different license. Roblox API keys stay local and are never sent to the
+license service. Creator ID is a user-provided value, not a Roblox-verified
+identity.
 
 Keep the desktop EXE open while using the uploader; closing it stops the local
 service and website.
@@ -33,10 +37,10 @@ From the project root:
 
 ```powershell
 magick -background none src\app-icon.svg -define icon:auto-resize=256,128,64,48,32,16 FariUploader.ico
-pyinstaller --noconfirm --clean --onefile --windowed --distpath . --workpath src\build --specpath src --icon ..\FariUploader.ico --add-data "..\index.html;." --add-data "..\app-manifest.json;." --name FariUploader-Portable src\launcher.py
+pyinstaller --noconfirm --clean --onefile --windowed --distpath . --workpath src\build --specpath src --icon ..\FariUploader.ico --add-data "..\index.html;." --add-data "..\app-manifest.json;." --name FariUploader-1.3.0 src\launcher.py
 ```
 
-`FariUploader-Portable.exe` is the only application file to distribute.
+`FariUploader-1.3.0.exe` is the only application file to distribute.
 `--windowed` suppresses the developer console, and `--onefile` bundles Python
 and its assets into the EXE. PyInstaller extracts its private runtime payload
 to a temporary directory while the app is running; users do not need to manage
