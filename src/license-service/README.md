@@ -13,24 +13,26 @@ are no longer needed.
 
 ## Create and deploy
 
-Run these commands from this directory. Install Wrangler and authenticate with
-your Cloudflare account first. Create the D1 database outside this directory so
-Wrangler does not try to validate the not-yet-filled ID in `wrangler.toml`:
+The D1 database ID is already configured in `wrangler.toml`. Run these commands
+from this directory after signing in to Cloudflare. Install Wrangler only if it
+is not already available:
 
 ```powershell
 npm install --global wrangler
 wrangler login
-Push-Location $env:TEMP
-wrangler d1 create fari-uploader-licenses
-Pop-Location
 ```
 
-Copy the returned database ID into `wrangler.toml`, replacing
-`REPLACE_WITH_D1_DATABASE_ID`. Then initialize the database and set a strong,
-unique admin token as a Worker secret:
+Initialize the existing remote D1 database:
 
 ```powershell
-wrangler d1 execute fari-uploader-licenses --remote --file=./schema.sql
+wrangler d1 execute fari-uploader-licenses --remote --file=.\schema.sql
+```
+
+Set a strong, unique admin token as a Worker secret. Wrangler prompts for its
+value; type it directly into the prompt. Do not paste it into chat, source code,
+the manifest, or GitHub:
+
+```powershell
 wrangler secret put ADMIN_TOKEN
 wrangler deploy
 ```
