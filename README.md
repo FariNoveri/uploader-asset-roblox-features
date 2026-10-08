@@ -37,10 +37,12 @@ From the project root:
 
 ```powershell
 magick -background none src\app-icon.svg -define icon:auto-resize=256,128,64,48,32,16 FariUploader.ico
-pyinstaller --noconfirm --clean --onefile --windowed --distpath . --workpath src\build --specpath src --icon ..\FariUploader.ico --add-data "..\index.html;." --add-data "..\app-manifest.json;." --name FariUploader-1.3.0 src\launcher.py
+$iconPath = (Resolve-Path .\FariUploader.ico).Path
+pyinstaller --noconfirm --clean --onefile --windowed --distpath . --workpath src\build --specpath src --icon $iconPath --add-data "..\index.html;." --add-data "..\app-manifest.json;." --name FariUploader-Portable .\src\launcher.py
 ```
 
-`FariUploader-1.3.0.exe` is the only application file to distribute.
+`FariUploader-Portable.exe` is the only application file to distribute. The
+Windows `.ico` is embedded as the executable's application icon.
 `--windowed` suppresses the developer console, and `--onefile` bundles Python
 and its assets into the EXE. PyInstaller extracts its private runtime payload
 to a temporary directory while the app is running; users do not need to manage
