@@ -72,12 +72,11 @@ for another account. The Roblox API key is never sent to this service. Creator
 ID remains an unverified user-provided value.
 
 The Manajemen Lisensi page also controls application maintenance and EXE
-updates. Maintenance blocks new launches and stops already-running version
-1.4.0+ uploaders when they next poll the service (within 30 seconds); the
-launcher stops its local web server immediately and closes after showing the
-maintenance message. The already-open browser tab cannot make further requests
-to the local uploader. Older already-running clients are not remotely stopped.
-To publish an update,
+updates. Maintenance blocks new launches and notifies already-running version
+1.4.0+ uploaders when they next poll the service (within 30 seconds). The
+launcher and local website show only the maintenance reason; the local API
+rejects actions and the upload queue pauses until maintenance ends. Older
+already-running clients are not remotely notified. To publish an update,
 first host the new Windows EXE at a public HTTPS URL. Enter its higher
 `x.y.z` version, URL, and SHA-256 in the panel and save. Version 1.4.0 and
 newer launchers automatically download the EXE, verify its SHA-256, and install

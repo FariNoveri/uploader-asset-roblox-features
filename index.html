@@ -44,6 +44,9 @@ button:active{transform:scale(.97)}
 small{display:block;color:var(--mut)}
 .bar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:16px}
 #msg{color:#c9c3c5}
+.maintenance{border:1px solid var(--red);background:linear-gradient(145deg,#260b10,#100507);color:var(--ink);text-align:center;padding:28px 22px}
+.maintenance h2{margin:0 0 10px;color:var(--red);font-weight:normal}
+.maintenance p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
 .prog{height:4px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:14px}
 .prog i{display:block;height:100%;width:35%;background:linear-gradient(90deg,transparent,var(--red),transparent);animation:sweep 1.4s ease-in-out infinite}
 @keyframes sweep{from{transform:translateX(-100%)}to{transform:translateX(300%)}}
@@ -80,6 +83,10 @@ input[type=checkbox]{accent-color:var(--red)}
 </style></head><body><div class="petals" id="petals"></div><main>
 <h1>Fari Noveri</h1>
 <p class="sub">Upload banyak lagu ke Roblox, lalu tinggal tidur</p>
+<section class="box maintenance" id="maintenanceNotice" role="alert" aria-live="assertive" hidden>
+ <h2>Aplikasi sedang maintenance</h2>
+ <p id="maintenanceReason"></p>
+</section>
 <section class="box" id="wiz" hidden>
  <div class="dots" id="dots"></div>
  <div class="pg"><h2>Alat ini gunanya apa?</h2>
@@ -210,7 +217,18 @@ function renderMore(key,total,render){
     all.onclick=()=>{visible[key]=total;render()};box.appendChild(all);
 }
 async function refresh(){
-  const s=await (await fetch('/api/state')).json();PL=s.playlists||[];if(!plInit){plInit=true;plSel()}
+  const response=await fetch('/api/state',{cache:'no-store'});const s=await response.json();
+  const notice=$('maintenanceNotice');
+  if(s.maintenance){
+    notice.hidden=false;$('maintenanceReason').textContent=s.maintenanceReason||'Aplikasi sedang maintenance.';
+    $('wiz').hidden=true;$('app').hidden=true;return
+  }
+  if(!s.licenseValidated){
+    notice.hidden=false;$('maintenanceReason').textContent='Maintenance selesai. Verifikasi lisensi melalui aplikasi untuk melanjutkan.';
+    $('wiz').hidden=true;$('app').hidden=true;return
+  }
+  notice.hidden=true;
+  PL=s.playlists||[];if(!plInit){plInit=true;plSel()}
   if(!loaded){loaded=true;hasKey=s.cfg.hasKey;$('cid').value=s.cfg.creatorId;$('grp').checked=s.cfg.isGroup;$('desc').value=s.cfg.description;$('shut').checked=s.cfg.shutdown;keyHint();
     if(!s.cfg.creatorId||!hasKey){$('wiz').hidden=false;show(0)}else{$('app').hidden=false}}
   updateAccountLock(s.cfg);
