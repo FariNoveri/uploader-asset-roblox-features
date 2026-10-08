@@ -34,6 +34,8 @@ settings every 30 seconds. Updates are downloaded over HTTPS, checked against
 the SHA-256 configured in the admin panel, and installed by restarting the
 EXE. Earlier versions must be manually updated to 1.4.0 once to enable
 self-updating; older already-running instances do not poll maintenance changes.
+When maintenance is detected, the launcher immediately stops its local web
+server and closes itself after showing the maintenance message.
 
 ## Build the single-file Windows release
 
