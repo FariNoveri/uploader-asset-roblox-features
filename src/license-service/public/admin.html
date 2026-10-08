@@ -47,6 +47,22 @@
       <p id="create-message" class="notice" role="status"></p>
     </section>
 
+    <section class="card" aria-labelledby="app-control-title">
+      <h2 id="app-control-title">Maintenance & update aplikasi</h2>
+      <p class="sub">Aplikasi aktif memeriksa pengaturan tiap 30 detik. Update tersedia otomatis diunduh, diverifikasi dengan SHA-256, lalu dipasang dengan membuka ulang EXE.</p>
+      <label style="display:flex;align-items:center;gap:9px;flex:none"><input id="maintenance-enabled" type="checkbox" style="width:auto">Aktifkan maintenance; pengguna tidak dapat menjalankan uploader</label>
+      <label style="margin-top:12px">Pesan maintenance<input id="maintenance-message" maxlength="500" placeholder="Contoh: Server sedang diperbarui. Coba lagi sebentar lagi."></label>
+      <div class="row" style="margin-top:14px">
+        <label>Versi baru (format x.y.z)<input id="update-version" inputmode="numeric" placeholder="1.4.0"></label>
+        <label>URL unduhan EXE (HTTPS)<input id="update-url" type="url" placeholder="https://github.com/.../FariUploader-Portable.exe"></label>
+      </div>
+      <label style="margin-top:12px">SHA-256 EXE<input id="update-sha256" maxlength="64" spellcheck="false" placeholder="64 karakter hexadecimal"></label>
+      <label style="margin-top:12px">Catatan update<textarea id="update-notes" maxlength="1000" rows="3" style="width:100%;border:1px solid var(--line);border-radius:7px;background:#0b0507;color:var(--ink);padding:10px;font:inherit"></textarea></label>
+      <div class="row" style="margin-top:12px"><button id="save-app-settings" type="button">Simpan pengaturan aplikasi</button><button id="clear-update" class="secondary" type="button">Hapus update</button></div>
+      <p id="app-settings-message" class="notice" role="status"></p>
+      <p class="privacy">Host file EXE pada URL HTTPS publik, lalu isi versi baru dan SHA-256 file yang sama. Jangan mengaktifkan update sebelum file rilis tersedia. Versi harus lebih tinggi dari versi pengguna.</p>
+    </section>
+
     <section class="card" aria-labelledby="list-title">
       <div class="row" style="justify-content:space-between;align-items:center">
         <div><h2 id="list-title">Lisensi & aktivasi perangkat</h2><p class="sub">Creator ID dan tipe akun yang dikunci ditampilkan di halaman Data akun.</p></div>
@@ -201,6 +217,46 @@
     }
   }
 
+  async function loadAppSettings() {
+    const settings = await api("/api/admin/app-settings");
+    $("maintenance-enabled").checked = settings.maintenance;
+    $("maintenance-message").value = settings.maintenanceMessage;
+    $("update-version").value = settings.update ? settings.update.version : "";
+    $("update-url").value = settings.update ? settings.update.url : "";
+    $("update-sha256").value = settings.update ? settings.update.sha256 : "";
+    $("update-notes").value = settings.update ? settings.update.notes : "";
+  }
+
+  $("save-app-settings").addEventListener("click", async () => {
+    setMessage($("app-settings-message"), "Menyimpan pengaturan...");
+    try {
+      const maintenanceEnabled = $("maintenance-enabled").checked;
+      if (maintenanceEnabled && !confirm("Aktifkan maintenance sekarang? Semua pengguna aktif akan dihentikan saat aplikasi memeriksa status berikutnya.")) return;
+      await api("/api/admin/app-settings", {
+        method: "POST",
+        body: JSON.stringify({
+          maintenanceEnabled,
+          maintenanceMessage: $("maintenance-message").value,
+          updateVersion: $("update-version").value,
+          updateUrl: $("update-url").value,
+          updateSha256: $("update-sha256").value,
+          updateNotes: $("update-notes").value,
+        }),
+      });
+      setMessage($("app-settings-message"), "Pengaturan aplikasi berhasil disimpan.", "success");
+    } catch (error) {
+      setMessage($("app-settings-message"), error.message, "error");
+    }
+  });
+
+  $("clear-update").addEventListener("click", () => {
+    $("update-version").value = "";
+    $("update-url").value = "";
+    $("update-sha256").value = "";
+    $("update-notes").value = "";
+    setMessage($("app-settings-message"), "Kolom update dikosongkan. Klik Simpan untuk menerapkan.");
+  });
+
   $("connect").addEventListener("click", async () => {
     if (!token.value.trim()) {
       setMessage(authMessage, "Masukkan token admin.", "error");
@@ -211,6 +267,7 @@
       sessionStorage.setItem("fari-admin-token", token.value.trim());
       workspace.hidden = false;
       setMessage(authMessage, "Terhubung ke server lisensi.", "success");
+      await loadAppSettings();
       await refresh();
     } catch (error) {
       workspace.hidden = true;

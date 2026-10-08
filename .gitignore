@@ -12,6 +12,7 @@ src/license-service/*
 !src/license-service/migrations/
 src/license-service/migrations/*
 !src/license-service/migrations/0002_account_binding.sql
+!src/license-service/migrations/0003_app_controls.sql
 !src/license-service/schema.sql
 !src/license-service/wrangler.toml
 !src/license-service/src/

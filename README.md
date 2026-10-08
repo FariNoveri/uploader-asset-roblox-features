@@ -14,8 +14,8 @@ Once the Worker is deployed, set its HTTPS `workers.dev` base URL as
 `licenseApiUrl` in `app-manifest.json` and rebuild the release EXE.
 
 The EXE bundles the Python launcher/backend, webpage, manifest, and icon. A user
-only needs `FariUploader.exe`; they do not need to prepare or keep `.py`, `.html`,
-or configuration files beside it. The application creates its own persistent
+only needs `FariUploader-Portable.exe`; they do not need to prepare or keep
+`.py`, `.html`, or configuration files beside it. The application creates its own persistent
 settings, license data, playlists, logs, song folder, and upload queue under
 `%LOCALAPPDATA%\FariUploader`. Those working files are kept locally so uploads
 and settings persist between runs.
@@ -29,7 +29,11 @@ license service. Creator ID is a user-provided value, not a Roblox-verified
 identity.
 
 Keep the desktop EXE open while using the uploader; closing it stops the local
-service and website.
+service and website. Version 1.4.0 and later checks maintenance and update
+settings every 30 seconds. Updates are downloaded over HTTPS, checked against
+the SHA-256 configured in the admin panel, and installed by restarting the
+EXE. Earlier versions must be manually updated to 1.4.0 once to enable
+self-updating; older already-running instances do not poll maintenance changes.
 
 ## Build the single-file Windows release
 
@@ -37,12 +41,12 @@ From the project root:
 
 ```powershell
 magick -background none src\app-icon.svg -define icon:auto-resize=256,128,64,48,32,16 FariUploader.ico
-$iconPath = (Resolve-Path .\FariUploader.ico).Path
-pyinstaller --noconfirm --clean --onefile --windowed --distpath . --workpath src\build --specpath src --icon $iconPath --add-data "..\index.html;." --add-data "..\app-manifest.json;." --name FariUploader-Portable .\src\launcher.py
+pyinstaller --noconfirm --clean --distpath . --workpath src\build .\src\FariUploader-Portable.spec
 ```
 
 `FariUploader-Portable.exe` is the only application file to distribute. The
-Windows `.ico` is embedded as the executable's application icon.
+Windows `.ico` is embedded as the executable's application icon and used by
+the launcher window.
 `--windowed` suppresses the developer console, and `--onefile` bundles Python
 and its assets into the EXE. PyInstaller extracts its private runtime payload
 to a temporary directory while the app is running; users do not need to manage

@@ -25,17 +25,19 @@ npm install --global wrangler
 wrangler login
 ```
 
-For a brand-new D1 database, initialize the schema:
+For a brand-new D1 database, initialize the complete schema:
 
 ```powershell
 wrangler d1 execute fari-uploader-licenses --remote --file=.\schema.sql
 ```
 
-For the existing database configured in this project, apply the account-binding
-migration exactly once instead:
+For an existing database, apply each migration that is not already present,
+exactly once and in order. Migration 0002 adds account binding and migration
+0003 adds maintenance/update controls:
 
 ```powershell
 wrangler d1 execute fari-uploader-licenses --remote --file=.\migrations\0002_account_binding.sql
+wrangler d1 execute fari-uploader-licenses --remote --file=.\migrations\0003_app_controls.sql
 ```
 
 Set a strong, unique admin token as a Worker secret. Wrangler prompts for its
@@ -68,6 +70,17 @@ the Creator ID and account/group type users bind to each license on their first
 save. That binding cannot be changed to another account; issue another license
 for another account. The Roblox API key is never sent to this service. Creator
 ID remains an unverified user-provided value.
+
+The Manajemen Lisensi page also controls application maintenance and EXE
+updates. Maintenance blocks new launches and stops already-running version
+1.4.0+ uploaders when they next poll the service (within 30 seconds). Older
+already-running clients are not remotely stopped. To publish an update,
+first host the new Windows EXE at a public HTTPS URL. Enter its higher
+`x.y.z` version, URL, and SHA-256 in the panel and save. Version 1.4.0 and
+newer launchers automatically download the EXE, verify its SHA-256, and install
+it by restarting. Earlier launcher releases must be manually replaced once
+before they can self-update. Clear the update fields and save to stop offering
+that update. Keep maintenance disabled unless the service should be unavailable.
 
 Give each generated key to its intended user through a private channel.
 Revoking a license blocks subsequent launches; an already open local application

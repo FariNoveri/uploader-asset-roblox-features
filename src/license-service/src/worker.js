@@ -1,5 +1,6 @@
 const CONSENT_VERSION = "2026-10-06-v3";
 const MAX_REQUEST_BYTES = 16 * 1024;
+const VERSION_PATTERN = /^\d+\.\d+\.\d+$/;
 const INSTALL_ID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -100,6 +101,120 @@ function validProfile(data) {
   );
 }
 
+function validUpdateUrl(value) {
+  if (typeof value !== "string" || value.length > 2048) {
+    return false;
+  }
+  try {
+    const url = new URL(value);
+    return (
+      url.protocol === "https:" &&
+      Boolean(url.hostname) &&
+      !url.username &&
+      !url.password &&
+      !url.port &&
+      !url.hash
+    );
+  } catch {
+    return false;
+  }
+}
+
+async function loadAppSettings(env) {
+  const settings = await env.DB.prepare(
+    `SELECT maintenance_enabled, maintenance_message, update_version,
+            update_url, update_sha256, update_notes
+     FROM app_settings WHERE id = 1`,
+  ).first();
+  if (!settings) {
+    throw new Error("Application settings have not been initialized.");
+  }
+  return settings;
+}
+
+function publicAppSettings(settings) {
+  const hasUpdate = Boolean(settings.update_version);
+  return {
+    maintenance: settings.maintenance_enabled === 1,
+    maintenanceMessage: settings.maintenance_message,
+    update: hasUpdate
+      ? {
+          version: settings.update_version,
+          url: settings.update_url,
+          sha256: settings.update_sha256,
+          notes: settings.update_notes,
+        }
+      : null,
+  };
+}
+
+async function rejectDuringMaintenance(env) {
+  const settings = await loadAppSettings(env);
+  if (settings.maintenance_enabled !== 1) {
+    return null;
+  }
+  return json({
+    valid: false,
+    maintenance: true,
+    error: settings.maintenance_message || "Aplikasi sedang dalam pemeliharaan.",
+  }, 503);
+}
+
+async function updateAdminSettings(request, env) {
+  const data = await readJson(request);
+  if (
+    !data ||
+    typeof data.maintenanceEnabled !== "boolean" ||
+    typeof data.maintenanceMessage !== "string" ||
+    data.maintenanceMessage.length > 500 ||
+    typeof data.updateVersion !== "string" ||
+    typeof data.updateUrl !== "string" ||
+    typeof data.updateSha256 !== "string" ||
+    typeof data.updateNotes !== "string" ||
+    data.updateNotes.length > 1000
+  ) {
+    return json({ error: "Pengaturan maintenance atau update tidak valid." }, 400);
+  }
+
+  const version = data.updateVersion.trim();
+  const url = data.updateUrl.trim();
+  const checksum = data.updateSha256.trim().toLowerCase();
+  const notes = data.updateNotes.trim();
+  const updateFields = [version, url, checksum];
+  const hasAnyUpdateField = updateFields.some(Boolean);
+  const hasAllUpdateFields = updateFields.every(Boolean);
+  if (
+    hasAnyUpdateField !== hasAllUpdateFields ||
+    (hasAnyUpdateField &&
+      (!VERSION_PATTERN.test(version) ||
+        !validUpdateUrl(url) ||
+        !/^[0-9a-f]{64}$/.test(checksum)))
+  ) {
+    return json({
+      error: "Versi update, URL HTTPS, dan SHA-256 wajib valid dan diisi bersama.",
+    }, 400);
+  }
+
+  const updatedAt = new Date().toISOString();
+  await env.DB.prepare(
+    `UPDATE app_settings
+     SET maintenance_enabled = ?, maintenance_message = ?, update_version = ?,
+         update_url = ?, update_sha256 = ?, update_notes = ?, updated_at = ?
+     WHERE id = 1`,
+  )
+    .bind(
+      Number(data.maintenanceEnabled),
+      data.maintenanceMessage.trim(),
+      version,
+      url,
+      checksum,
+      notes,
+      updatedAt,
+    )
+    .run();
+  return json({ ok: true, updatedAt });
+}
+
 function createLicenseKey() {
   const bytes = crypto.getRandomValues(new Uint8Array(24));
   const value = Array.from(bytes, (byte) =>
@@ -112,6 +227,10 @@ async function validateLicense(request, env) {
   const data = await readJson(request);
   if (!validProfile(data) || !validLicenseKey(data.licenseKey)) {
     return json({ valid: false, error: "Permintaan lisensi atau persetujuan tidak valid." }, 400);
+  }
+  const maintenanceResponse = await rejectDuringMaintenance(env);
+  if (maintenanceResponse) {
+    return maintenanceResponse;
   }
 
   const keyHash = await sha256(data.licenseKey);
@@ -206,6 +325,11 @@ async function updateProfile(request, env) {
     !validLicenseKey(data?.licenseKey)
   ) {
     return json({ ok: false, error: "Permintaan profil atau persetujuan tidak valid." }, 400);
+  }
+  const maintenanceResponse = await rejectDuringMaintenance(env);
+  if (maintenanceResponse) {
+    const body = await maintenanceResponse.json();
+    return json({ ok: false, maintenance: true, error: body.error }, 503);
   }
   const keyHash = await sha256(data.licenseKey);
   const now = new Date().toISOString();
@@ -323,6 +447,13 @@ async function adminApi(request, env, url) {
     ).all();
     return json({ licenses: result.results });
   }
+  if (request.method === "GET" && url.pathname === "/api/admin/app-settings") {
+    const settings = await loadAppSettings(env);
+    return json(publicAppSettings(settings));
+  }
+  if (request.method === "POST" && url.pathname === "/api/admin/app-settings") {
+    return updateAdminSettings(request, env);
+  }
   if (request.method === "GET" && url.pathname === "/api/admin/accounts") {
     const result = await env.DB.prepare(
       `SELECT l.id AS license_id, l.label, l.active, l.expires_at, l.profile_locked,
@@ -395,6 +526,9 @@ export default {
           new Request(new URL("/accounts.html", request.url)),
         );
         return pageResponse(response);
+      }
+      if (url.pathname === "/api/app/status" && request.method === "GET") {
+        return json(publicAppSettings(await loadAppSettings(env)));
       }
       if (url.pathname === "/api/license/validate" && request.method === "POST") {
         return await validateLicense(request, env);
