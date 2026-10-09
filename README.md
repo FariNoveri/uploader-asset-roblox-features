@@ -22,6 +22,10 @@ application is running and are never written to AppData. If the app closes
 before an audio file is uploaded, select that file again to retry it. Older
 audio files in the app's legacy song folder are migrated to memory when possible
 and then removed from disk.
+Use **Reset semua data lokal** in the website to erase local settings, license,
+API key, queue, playlists, and logs; the app restarts and requires license
+verification again. This does not erase account data stored by the license
+service.
 
 The launcher requires explicit consent before sending the license key, a random
 installation ID, connection IP, and the Creator ID and account/group type

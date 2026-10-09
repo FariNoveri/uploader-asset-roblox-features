@@ -131,7 +131,13 @@ input[type=checkbox]{accent-color:var(--red)}
  <div class="load-fade" id="uploadFade"><div id="list"></div></div><div class="bar load-controls" id="uploadMore" hidden></div>
  <div class="prog" id="prog" hidden><i></i></div>
  <div class="bar"><button id="start">Mulai upload</button><button id="retry">Coba ulang yang gagal</button><button id="check">Cek status di Roblox</button><span class="st" id="sum"></span><span class="st" id="msg2" role="status"></span></div>
-</section><p><button id="guide">Panduan dan pengaturan</button></p></div>
+</section><p><button id="guide">Panduan dan pengaturan</button></p>
+<details class="box" style="margin-top:18px">
+ <summary>Reset data aplikasi di perangkat ini</summary>
+ <p class="st">Menghapus lisensi tersimpan, kunci API Roblox, pengaturan, riwayat antrean, playlist, dan log lokal. Aplikasi akan ditutup lalu dibuka kembali; masukkan lisensi lagi setelah reset. Data akun yang sudah tersimpan di server lisensi tidak terhapus.</p>
+ <button id="reset-data" type="button">Reset semua data lokal</button>
+ <span class="st" id="reset-message" role="status"></span>
+</details></div>
 <div class="tab" id="t-his" hidden><section class="box">
  <details style="margin-bottom:14px"><summary>Impor lagu lama dari akunmu</summary>
   <p class="st">Roblox tidak menyediakan cara mengambil daftar semua audio lewat kunci API. Jadi tempel ID atau link audio yang mau dimasukkan ke riwayat. ID-nya adalah angka panjang di alamat halaman audio itu di Creator Hub. Boleh banyak sekaligus, pisahkan dengan enter atau spasi. Tiap audio ditandai <b>Sama</b> atau <b>Beda akun</b> dibandingkan Creator ID di pengaturan, karena audio milik akun lain akan ditolak Roblox saat diberi izin akses.</p>
@@ -296,6 +302,17 @@ $('next').onclick=async()=>{
   if(pg===PG.length-1){$('wiz').hidden=true;$('app').hidden=false;return}
   show(pg+1)};
 $('guide').onclick=()=>{$('app').hidden=true;$('wiz').hidden=false;show(0)};
+$('reset-data').onclick=async()=>{
+  if(!confirm('Hapus SEMUA data lokal Fari Uploader di perangkat ini, termasuk lisensi dan kunci API? Aplikasi akan dibuka ulang dan kamu perlu memasukkan lisensi lagi. Data yang tersimpan di server tidak dihapus.'))return;
+  $('reset-data').disabled=true;$('reset-message').textContent='Meminta aplikasi berhenti dan menghapus data...';
+  try{
+    const result=await post('/api/reset',{});
+    if(result.error){$('reset-data').disabled=false;$('reset-message').textContent=result.error;return}
+    $('reset-message').textContent='Aplikasi sedang direset dan akan dibuka ulang.';
+  }catch(e){
+    $('reset-data').disabled=false;$('reset-message').textContent='Reset gagal dimulai. Coba lagi.';
+  }
+};
 $('start').onclick=async()=>{const r=await post('/api/start');$('msg2').textContent=r.error||'Upload berjalan. Kamu boleh tinggal tidur, tab ini boleh ditutup.';refresh()};
 $('check').onclick=async()=>{await post('/api/check');$('msg2').textContent='Mengecek ke Roblox, hasilnya muncul beberapa detik lagi.'};
 $('retry').onclick=async()=>{await post('/api/retry');sig='';refresh()};
