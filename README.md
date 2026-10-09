@@ -16,9 +16,12 @@ Once the Worker is deployed, set its HTTPS `workers.dev` base URL as
 The EXE bundles the Python launcher/backend, webpage, manifest, and icon. A user
 only needs `FariUploader-Portable.exe`; they do not need to prepare or keep
 `.py`, `.html`, or configuration files beside it. The application creates its own persistent
-settings, license data, playlists, logs, song folder, and upload queue under
-`%LOCALAPPDATA%\FariUploader`. Those working files are kept locally so uploads
-and settings persist between runs.
+settings, license data, playlists, logs, and upload queue under
+`%LOCALAPPDATA%\FariUploader`. Audio bytes are kept in memory only while the
+application is running and are never written to AppData. If the app closes
+before an audio file is uploaded, select that file again to retry it. Older
+audio files in the app's legacy song folder are migrated to memory when possible
+and then removed from disk.
 
 The launcher requires explicit consent before sending the license key, a random
 installation ID, connection IP, and the Creator ID and account/group type
@@ -29,7 +32,9 @@ license service. Creator ID is a user-provided value, not a Roblox-verified
 identity.
 
 Keep the desktop EXE open while using the uploader; closing it stops the local
-service and website. Version 1.4.0 and later checks maintenance and update
+service and website. The close button remains available while the launcher is
+loading; closing during setup cancels the operation and stops any local service
+already started. Version 1.4.0 and later checks maintenance and update
 settings every 30 seconds. Updates are downloaded over HTTPS, checked against
 the SHA-256 configured in the admin panel, and installed by restarting the
 EXE. Earlier versions must be manually updated to 1.4.0 once to enable

@@ -127,6 +127,7 @@ input[type=checkbox]{accent-color:var(--red)}
 <div id="app" hidden><div class="tabs"><button class="on" data-t="up">Upload</button><button data-t="his">Riwayat</button><button data-t="izin">Izin akses</button><button data-t="pl">Playlist</button></div>
 <div class="tab" id="t-up"><section class="box">
  <label class="drop" id="drop"><input type="file" id="files" accept=".mp3,.ogg,.wav,.flac" multiple>Taruh lagu di sini, atau klik untuk memilih</label>
+ <p class="st">File lagu hanya disimpan sementara di memori, bukan di AppData. Jika aplikasi ditutup sebelum upload berhasil, pilih ulang file tersebut untuk mencobanya lagi.</p>
  <div class="load-fade" id="uploadFade"><div id="list"></div></div><div class="bar load-controls" id="uploadMore" hidden></div>
  <div class="prog" id="prog" hidden><i></i></div>
  <div class="bar"><button id="start">Mulai upload</button><button id="retry">Coba ulang yang gagal</button><button id="check">Cek status di Roblox</button><span class="st" id="sum"></span><span class="st" id="msg2" role="status"></span></div>
@@ -262,7 +263,15 @@ function renderUpload(){
 }
 async function add(fs){
     const files=Array.from(fs);
-    for(const f of files){await fetch('/api/add',{method:'POST',headers:{'X-App':'1','X-Name':encodeURIComponent(f.name)},body:f})}
+    const errors=[];
+    for(const f of files){
+      try{
+        const response=await fetch('/api/add',{method:'POST',headers:{'X-App':'1','X-Name':encodeURIComponent(f.name)},body:f});
+        const result=await response.json();
+        if(!response.ok)errors.push(f.name+': '+(result.error||'Gagal menambahkan lagu.'));
+      }catch(e){errors.push(f.name+': Gagal mengirim file.')}
+    }
+  $('msg2').textContent=errors.length?errors.join(' '):files.length+' lagu ditambahkan ke antrean.';
   sig='';refresh();
 }
 $('files').onchange=e=>{add(e.target.files);e.target.value=''};
@@ -423,7 +432,7 @@ $('ecancel').onclick=()=>$('dlg').close();
 $('flt').onchange=()=>{visible.history=5;renderHis()};
 $('impgo').onclick=async()=>{const r=await post('/api/import',{text:$('imptxt').value});$('impmsg').textContent=r.error||'Diproses...';if(!r.error)$('imptxt').value=''};
 $('csv').onclick=()=>{
-    const rows=[['Waktu','Judul','File','Asset ID','Status kirim','Status Roblox','Akun','Izin akses','Catatan']].concat(S.queue.map(q=>[q.waktu||'',q.title,q.file,q.assetId||'',q.status,q.mod||'',q.pemilik||'',izinTxt(q),[q.note,q.moderationReason&&'Alasan Roblox: '+q.moderationReason].filter(Boolean).join(' - ')]));
+    const rows=[['Waktu','Judul','File','Asset ID','Status kirim','Status Roblox','Akun','Izin akses','Catatan']].concat(S.queue.map(q=>[q.waktu||'',q.title,q.file||(q.title+(q.audioExt||'')),q.assetId||'',q.status,q.mod||'',q.pemilik||'',izinTxt(q),[q.note,q.moderationReason&&'Alasan Roblox: '+q.moderationReason].filter(Boolean).join(' - ')]));
   const csv='\ufeff'+rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\r\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='riwayat-upload.csv';a.click()};
 let PL=[],plInit=false,ed=null;const plPick=new Set();
