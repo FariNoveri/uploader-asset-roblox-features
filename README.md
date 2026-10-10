@@ -13,19 +13,25 @@ Cloudflare secret and must never be committed.
 Once the Worker is deployed, set its HTTPS `workers.dev` base URL as
 `licenseApiUrl` in `app-manifest.json` and rebuild the release EXE.
 
-The EXE bundles the Python launcher/backend, webpage, manifest, and icon. A user
-only needs `FariUploader-Portable.exe`; they do not need to prepare or keep
-`.py`, `.html`, or configuration files beside it. The application creates its own persistent
-settings, license data, playlists, logs, and upload queue under
+The EXE bundles the Python launcher/backend, webpage, manifest, and icon. The
+Python backend is split into focused `upload_*.py` modules under `src/`, with
+`upload.py` remaining the shared state and entry-point facade. A user only
+needs `FariUploader-Portable.exe`; they do not need to prepare or keep
+`.py`, `.html`, or configuration files beside it. The application creates its
+persistent settings, license data, playlists, logs,
+and upload queue under `Users\<username>\AppData\Local\FariUploader` on a
+writable fixed drive other than the Windows system drive (for example, `D:`).
+It keeps using the selected drive when available; otherwise it selects the one
+with the most free space. Existing data under the previous
+`%LOCALAPPDATA%\FariUploader` location is migrated there when possible. If no
+writable non-system drive is available, the application falls back to
 `%LOCALAPPDATA%\FariUploader`. Audio bytes are kept in memory only while the
-application is running and are never written to AppData. If the app closes
-before an audio file is uploaded, select that file again to retry it. Older
-audio files in the app's legacy song folder are migrated to memory when possible
-and then removed from disk.
+application is running and are never written to disk. If the app closes before
+an audio file is uploaded, select that file again to retry it.
 Use **Reset semua data lokal** in the website to erase local settings, license,
-API key, queue, playlists, and logs; the app restarts and requires license
-verification again. This does not erase account data stored by the license
-service.
+API key, queue, playlists, and logs from the selected data drive; the app
+restarts and requires license verification again. This does not erase account
+data stored by the license service.
 
 The launcher requires explicit consent before sending the license key, a random
 installation ID, connection IP, and the Creator ID and account/group type
@@ -46,6 +52,10 @@ self-updating; older already-running instances do not poll maintenance changes.
 When maintenance is detected, the launcher and website show only the admin's
 maintenance reason. The local uploader API rejects actions and pauses the
 upload queue until maintenance ends.
+
+The website's speed tool is temporarily covered with a translucent
+"Sedang dalam pengembangan" notice while the feature is being prepared.
+Upload history and playlist editing provide search and filter controls.
 
 ## Build the single-file Windows release
 

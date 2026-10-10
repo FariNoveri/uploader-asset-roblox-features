@@ -20,8 +20,27 @@ h1{font:700 clamp(2.8rem,10vw,5rem)/1 "UnifrakturCook",Georgia,serif;text-align:
 .tab:not([hidden]),.pg:not([hidden]),#wiz:not([hidden]){animation:rise .4s ease both}
 .row{display:flex;gap:14px;flex-wrap:wrap}
 label{flex:1 1 200px;display:flex;flex-direction:column;gap:5px;color:#c9c3c5;font-size:.95rem}
-input[type=text],input[type=password],select,textarea{background:#000;border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:10px;font:inherit;width:100%;transition:border-color .2s,box-shadow .2s}
+input[type=text],input[type=password],input[type=search],select,textarea{background:#000;border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:10px;font:inherit;width:100%;transition:border-color .2s,box-shadow .2s}
+input[type=range]{width:100%;accent-color:var(--red);cursor:pointer}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px rgba(255,42,58,.25)}
+.filter-tools{display:grid;grid-template-columns:minmax(180px,1fr) minmax(150px,.48fr);gap:10px;align-items:end}
+.speed-panel{padding:16px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(145deg,rgba(255,42,58,.12),rgba(0,0,0,.5))}
+.speed-feature{position:relative}
+.speed-development-overlay{position:absolute;inset:0;z-index:5;display:grid;place-items:center;padding:20px;border:1px solid rgba(255,42,58,.42);border-radius:12px;background:rgba(5,2,3,.68);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);text-align:center}
+.speed-development-overlay span{padding:12px 20px;border:1px solid var(--line);border-radius:10px;background:rgba(12,5,7,.72);color:var(--ink);font-size:1.2rem;letter-spacing:.04em}
+.speed-readout{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}
+.speed-value{font:700 1.4rem/1.2 Consolas,monospace;color:var(--ink)}
+.speed-scale{display:flex;justify-content:space-between;color:var(--mut);font-size:.78rem}
+.speed-control-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.speed-control-grid label{min-width:0}
+.speed-rpm-row{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:end;margin-top:12px}
+.speed-rpm-row>span{padding:0 0 10px;color:var(--mut)}
+.speed-files{max-height:190px;overflow:auto;margin-top:10px}
+.speed-file{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;padding:9px 2px;border-bottom:1px solid rgba(255,255,255,.08)}
+.speed-file small{grid-column:1/-1}
+.speed-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.speed-summary>div{padding:10px;border-radius:8px;background:rgba(255,255,255,.035)}
+.speed-summary strong{display:block;color:var(--ink);font:600 1.05rem Consolas,monospace}
 .chk{flex-direction:row;align-items:center;gap:8px;flex:1 1 100%}
 button{background:rgba(255,42,58,.1);border:1px solid var(--red);border-radius:8px;color:var(--ink);padding:10px 20px;font:inherit;cursor:pointer;transition:transform .15s,box-shadow .25s,background .25s}
 button:hover{background:rgba(255,42,58,.28);transform:translateY(-2px);box-shadow:0 6px 22px rgba(255,42,58,.4)}
@@ -64,6 +83,23 @@ small{display:block;color:var(--mut)}
 .tw{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:.88rem}
 th,td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;vertical-align:top}th{color:var(--mut);font-weight:normal;white-space:nowrap}
 tbody tr{animation:slide .35s ease both;transition:background .2s}tbody tr:hover{background:rgba(255,42,58,.07)}
+.tw{max-height:540px;border:1px solid var(--line);border-radius:10px}
+#tb{min-width:1080px;table-layout:fixed;font-size:.82rem}
+#tb thead th{position:sticky;top:0;z-index:2;background:#160a0c}
+#tb th:nth-child(1),#tb td:nth-child(1){width:145px;white-space:nowrap}
+#tb th:nth-child(2),#tb td:nth-child(2){width:150px}
+#tb th:nth-child(3),#tb td:nth-child(3){width:105px}
+#tb th:nth-child(4),#tb td:nth-child(4){width:105px}
+#tb th:nth-child(5),#tb td:nth-child(5){width:115px}
+#tb th:nth-child(6),#tb td:nth-child(6){width:100px}
+#tb th:nth-child(7),#tb td:nth-child(7){width:150px}
+#tb th:nth-child(8),#tb td:nth-child(8){width:230px;overflow-wrap:anywhere}
+#tb th:nth-child(9),#tb td:nth-child(9){width:140px}
+#tb td:nth-child(3),#tb td:nth-child(4){font: .78rem/1.5 Consolas,monospace;overflow-wrap:anywhere}
+#tb td:nth-child(2){overflow-wrap:anywhere}
+#tb td .pill{font-size:.75rem;padding:2px 8px}
+#tb .act{white-space:normal}
+#tb .act button{margin:0 4px 4px 0}
 .res{background:#15090b;border:1px solid var(--line);border-radius:10px;max-height:320px;overflow:auto;margin-top:6px;animation:rise .25s ease both}
 .rs{display:flex;gap:12px;align-items:center;width:100%;text-align:left;border:0;border-bottom:1px solid rgba(255,255,255,.06);border-radius:0;background:none;box-shadow:none;padding:9px 12px}
 .rs:hover{background:rgba(255,42,58,.15);transform:none;box-shadow:none}
@@ -78,7 +114,7 @@ input[type=checkbox]{accent-color:var(--red)}
 #mx input[type=checkbox]{width:18px;height:18px;cursor:pointer;vertical-align:middle}#mx input:disabled{cursor:not-allowed;opacity:.55}
 .act{white-space:nowrap}.act button{padding:3px 11px;margin-right:6px;font-size:.82rem}
 #plt input{padding:5px 8px}#plt td,#plt th{white-space:nowrap;vertical-align:middle}#pladd{max-height:220px;overflow:auto;margin:8px 0;display:flex;flex-direction:column;gap:6px}
-@media (max-width:560px){.it{grid-template-columns:1fr auto}}
+@media (max-width:560px){.it{grid-template-columns:1fr auto}.filter-tools,.speed-control-grid{grid-template-columns:1fr}.speed-panel{padding:12px}.speed-rpm-row{grid-template-columns:1fr}.speed-rpm-row>span{display:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style></head><body><div class="petals" id="petals"></div><main>
 <h1>Fari Noveri</h1>
@@ -117,24 +153,56 @@ input[type=checkbox]{accent-color:var(--red)}
   <p class="st">Creator ID dan jenis akun akan dikunci ke lisensi ini setelah disimpan pertama kali. API key tetap disimpan lokal dan tidak dikirim ke server lisensi. Creator ID/jenis akun yang disimpan dapat dilihat administrator.</p></div>
  <div class="pg"><h2>Semua siap</h2>
   <p>Di halaman berikutnya kamu tinggal memasukkan lagu, lalu klik <b>Mulai upload</b>. Beberapa hal yang perlu kamu tahu:</p><ul>
-  <li>Jendela hitam tempat program ini jalan jangan ditutup, dan komputer harus tetap menyala. Tab browser ini boleh ditutup.</li>
+  <li>Jendela aplikasi Fari Uploader jangan ditutup, dan komputer harus tetap menyala. Tab browser ini boleh ditutup.</li>
   <li>Selama upload berjalan, komputer tidak akan masuk mode sleep.</li>
   <li>Lagu yang gagal bisa dicoba lagi dengan tombol <b>Coba ulang yang gagal</b>.</li>
   <li>Lagu yang berhasil akan menampilkan ID. Di Roblox Studio, ID itu dipakai dalam bentuk <code>rbxassetid://ID</code>.</li>
   <li>Program mengecek ke Roblox tiap satu menit apakah lagunya disetujui atau ditolak. Pemeriksaannya bisa makan waktu beberapa menit sampai lebih lama.</li></ul></div>
  <div class="bar"><button id="prev">Kembali</button><button id="next">Lanjut</button><span id="msg" role="status"></span></div>
 </section>
-<div id="app" hidden><div class="tabs"><button class="on" data-t="up">Upload</button><button data-t="his">Riwayat</button><button data-t="izin">Izin akses</button><button data-t="pl">Playlist</button></div>
+<div id="app" hidden><div class="tabs"><button class="on" data-t="up">Upload</button><button data-t="speed">Alat Speed</button><button data-t="his">Riwayat</button><button data-t="izin">Izin akses</button><button data-t="pl">Playlist</button></div>
+
+<div class="tab" id="t-speed" hidden><section class="box">
+ <div class="speed-feature">
+ <div id="speedFeatureControls" aria-hidden="true" inert>
+ <h2>Ubah Speed dan Pitch</h2>
+ <p class="st">Alat ini sedang disiapkan.</p>
+ <div class="speed-panel" style="margin:16px 0">
+  <div class="speed-control-grid">
+   <label>Speed multiplier<input type="number" id="speedToolValue" min="0.1" max="5" step="0.01" value="2"></label>
+   <label>Perubahan speed (%)<input type="number" id="speedPercent" min="-90" max="400" step="1" value="100"></label>
+  </div>
+  <div class="speed-rpm-row">
+   <label>Vinyl RPM dari<select id="speedRpmFrom"><option value="none">n/a</option><option value="33.333333">33⅓</option><option value="45">45</option><option value="78">78</option></select></label>
+   <span>ke</span>
+   <label>Vinyl RPM ke<select id="speedRpmTo"><option value="none">n/a</option><option value="33.333333">33⅓</option><option value="45">45</option><option value="78">78</option></select></label>
+  </div>
+  <div class="speed-readout" style="margin:14px 0 8px"><span class="st">Pengatur kecepatan</span><output class="speed-value" id="speedToolOutput">2.00x · +100%</output></div>
+  <input type="range" id="speedSlider" min="0.1" max="5" step="0.01" value="2" aria-label="Kecepatan audio">
+  <div class="speed-scale"><span>0.1x · Lambat</span><span>1.0x · Normal</span><span>5.0x · Cepat</span></div>
+ </div>
+ <label class="chk" style="margin:0 0 14px"><input type="checkbox" id="speedUseFilter" checked> EQ penjernih opsional (bukan bagian dari efek speed/pitch)</label>
+ <label class="drop" id="dropSpeed"><input type="file" id="fileSpeed" accept=".mp3,.ogg,.wav,.flac" multiple>Taruh lagu di sini, atau klik untuk memilih</label>
+ <div class="speed-files" id="speedFiles"></div>
+ <div class="speed-summary"><div><span class="st">Durasi saat ini</span><strong id="speedCurrentLength">—</strong></div><div><span class="st">Durasi baru (perkiraan)</span><strong id="speedNewLength">—</strong></div></div>
+ <audio id="speedPreview" controls hidden style="width:100%;margin-top:12px"></audio>
+ <div class="prog" id="progSpeed" hidden><i></i></div>
+ <div class="bar" style="margin-top:12px"><button id="speedPreviewButton" type="button">Preview lagu pertama</button><button id="speedCancelButton" type="button">Batal</button><button id="speedApplyButton" type="button">Terapkan dan masukkan ke antrean</button><span class="st" id="msgSpeed" role="status"></span></div>
+ </div>
+ <div class="speed-development-overlay" role="status" aria-live="polite"><span>Sedang dalam pengembangan</span></div>
+ </div>
+</section></div>
+
 <div class="tab" id="t-up"><section class="box">
- <label class="drop" id="drop"><input type="file" id="files" accept=".mp3,.ogg,.wav,.flac" multiple>Taruh lagu di sini, atau klik untuk memilih</label>
- <p class="st">File lagu hanya disimpan sementara di memori, bukan di AppData. Jika aplikasi ditutup sebelum upload berhasil, pilih ulang file tersebut untuk mencobanya lagi.</p>
+ <label class="drop" id="drop"><input type="file" id="files" accept=".mp3,.ogg,.wav,.flac" multiple>Taruh lagu di sini untuk upload normal, atau klik untuk memilih</label>
+ <p class="st">File lagu hanya disimpan sementara di memori, bukan di disk. Data aplikasi disimpan di <code id="data-location">memeriksa lokasi...</code>. Jika aplikasi ditutup sebelum upload berhasil, pilih ulang file tersebut untuk mencobanya lagi.</p>
  <div class="load-fade" id="uploadFade"><div id="list"></div></div><div class="bar load-controls" id="uploadMore" hidden></div>
  <div class="prog" id="prog" hidden><i></i></div>
  <div class="bar"><button id="start">Mulai upload</button><button id="retry">Coba ulang yang gagal</button><button id="check">Cek status di Roblox</button><span class="st" id="sum"></span><span class="st" id="msg2" role="status"></span></div>
 </section><p><button id="guide">Panduan dan pengaturan</button></p>
 <details class="box" style="margin-top:18px">
  <summary>Reset data aplikasi di perangkat ini</summary>
- <p class="st">Menghapus lisensi tersimpan, kunci API Roblox, pengaturan, riwayat antrean, playlist, dan log lokal. Aplikasi akan ditutup lalu dibuka kembali; masukkan lisensi lagi setelah reset. Data akun yang sudah tersimpan di server lisensi tidak terhapus.</p>
+ <p class="st">Menghapus lisensi tersimpan, kunci API Roblox, pengaturan, riwayat antrean, playlist, dan log lokal di lokasi data aplikasi. Aplikasi akan ditutup lalu dibuka kembali; masukkan lisensi lagi setelah reset. Data akun yang sudah tersimpan di server lisensi tidak terhapus.</p>
  <button id="reset-data" type="button">Reset semua data lokal</button>
  <span class="st" id="reset-message" role="status"></span>
 </details></div>
@@ -143,7 +211,8 @@ input[type=checkbox]{accent-color:var(--red)}
   <p class="st">Roblox tidak menyediakan cara mengambil daftar semua audio lewat kunci API. Jadi tempel ID atau link audio yang mau dimasukkan ke riwayat. ID-nya adalah angka panjang di alamat halaman audio itu di Creator Hub. Boleh banyak sekaligus, pisahkan dengan enter atau spasi. Tiap audio ditandai <b>Sama</b> atau <b>Beda akun</b> dibandingkan Creator ID di pengaturan, karena audio milik akun lain akan ditolak Roblox saat diberi izin akses.</p>
   <textarea id="imptxt" rows="4" placeholder="123456789&#10;987654321"></textarea>
   <div class="bar"><button id="impgo">Impor</button><span class="st" id="impmsg" role="status"></span></div></details>
- <div class="bar" style="margin:0 0 12px"><select id="flt" aria-label="Filter"><option value="">Semua</option><option value="berhasil">Terkirim</option><option value="disetujui">Disetujui</option><option value="ditolak">Ditolak</option><option value="gagal">Gagal</option></select><button id="csv">Unduh CSV</button><span class="st" id="hmsg" role="status"></span></div>
+ <div class="filter-tools" style="margin:0 0 12px"><label>Cari riwayat<input type="search" id="historySearch" placeholder="Judul, asset ID, atau catatan"></label><label>Filter status<select id="flt" aria-label="Filter"><option value="">Semua</option><option value="berhasil">Terkirim</option><option value="disetujui">Disetujui</option><option value="ditolak">Ditolak</option><option value="gagal">Gagal</option></select></label></div>
+ <div class="bar" style="margin:0 0 12px"><button id="csv">Unduh CSV</button><span class="st" id="hmsg" role="status"></span></div>
  <div class="tw"><table id="tb"><thead><tr><th>Waktu</th><th>Judul</th><th>Asset ID</th><th>Kirim</th><th>Roblox</th><th>Akun</th><th>Izin akses</th><th>Catatan</th><th>Aksi</th></tr></thead><tbody></tbody></table></div><p class="st" id="empty2" hidden>Belum ada riwayat.</p>
  <div class="bar load-controls" id="historyMore" hidden></div>
 </section></div>
@@ -185,10 +254,12 @@ input[type=checkbox]{accent-color:var(--red)}
    <label>ImageId (angka atau rbxassetid://...)<input type="text" id="plimg"></label>
    <label>Artis bawaan untuk lagu baru<input type="text" id="plart" maxlength="80"></label></div>
   <details style="margin:14px 0" open><summary>Tambah dari lagu yang sudah kamu upload <span class="st" id="pladdn"></span></summary>
+   <label style="margin:12px 0">Cari lagu yang tersedia<input type="search" id="pladdSearch" placeholder="Judul atau asset ID"></label>
    <div id="pladd"></div><div class="bar"><button id="pladdall">Centang semua</button><button id="pladdgo">Tambahkan yang dicentang</button></div></details>
   <details style="margin:14px 0"><summary>Tambah manual (judul + Song ID)</summary>
    <div class="row" style="margin-top:10px"><label>Judul<input type="text" id="plmn" maxlength="100"></label><label>Song ID<input type="text" id="plmid" inputmode="numeric"></label></div>
    <div class="bar"><button id="plmgo">Tambah</button></div></details>
+  <div class="filter-tools" style="margin:14px 0 8px"><label>Cari lagu di playlist<input type="search" id="plSongSearch" placeholder="Judul, artis, atau Song ID"></label><label>Filter lagu<select id="plSongFilter"><option value="">Semua lagu</option><option value="speed">Dengan speed khusus</option><option value="normal">Tanpa speed khusus</option></select></label></div>
   <p class="st" id="plcount"></p>
   <div class="mxw"><table id="plt"><thead><tr><th>#</th><th>Judul</th><th>Artis</th><th>Song ID</th><th>Speed</th><th>Aksi</th></tr></thead><tbody></tbody></table></div>
   <p class="st">Kolom Speed (CustomSpeed) boleh kosong. Nomor Order mengikuti urutan di tabel, jadi pakai tombol panah untuk mengatur urutan.</p>
@@ -200,6 +271,105 @@ input[type=checkbox]{accent-color:var(--red)}
  <p class="st">Yang bisa diubah hanya nama dan deskripsi. Isi audionya tidak bisa diganti. Kalau mau ganti lagunya, upload versi baru lalu arsipkan yang lama.</p>
  <div class="bar"><button id="esave">Simpan ke Roblox</button><button id="ecancel">Batal</button></div></dialog></div></main>
 <script>
+const idb = {
+  db: null,
+  async init() {
+    if (this.db) return;
+    return new Promise(res => {
+      const req = indexedDB.open('FariUploaderDB', 1);
+      req.onupgradeneeded = e => e.target.result.createObjectStore('audioFiles');
+      req.onsuccess = e => { this.db = e.target.result; res(); };
+    });
+  },
+  async put(id, buffer) {
+    await this.init();
+    return new Promise(res => {
+      this.db.transaction('audioFiles', 'readwrite').objectStore('audioFiles').put(buffer, id).oncomplete = res;
+    });
+  },
+  async get(id) {
+    await this.init();
+    return new Promise(res => {
+      const req = this.db.transaction('audioFiles').objectStore('audioFiles').get(id);
+      req.onsuccess = () => res(req.result);
+    });
+  }
+};
+
+async function processAudioSpeed(arrayBuffer, speed, useFilter = false) {
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  const ctx = new AudioContext();
+  let audioBuffer;
+  try {
+    audioBuffer = await ctx.decodeAudioData(arrayBuffer.slice(0));
+  } finally {
+    await ctx.close();
+  }
+ 
+  const sampleRate = 22050;
+  const newDuration = audioBuffer.duration / speed;
+  const length = Math.ceil(newDuration * sampleRate);
+  if (44 + length * 2 > 20 * 1024 * 1024) {
+    throw new Error('Hasil WAV melebihi batas upload 20 MB. Coba speed yang lebih cepat.');
+  }
+
+  const OfflineAudioContext = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  const offlineCtx = new OfflineAudioContext(1, length, sampleRate);
+  const source = offlineCtx.createBufferSource();
+  source.buffer = audioBuffer;
+  source.playbackRate.value = speed;
+
+  if (useFilter) {
+    const lowCut = offlineCtx.createBiquadFilter();
+    lowCut.type = 'highpass';
+    lowCut.frequency.value = 70;
+    lowCut.Q.value = 0.707;
+    const clarity = offlineCtx.createBiquadFilter();
+    clarity.type = 'highshelf';
+    clarity.frequency.value = 2800;
+    clarity.gain.value = 2.5;
+    source.connect(lowCut);
+    lowCut.connect(clarity);
+    clarity.connect(offlineCtx.destination);
+  } else {
+    source.connect(offlineCtx.destination);
+  }
+  source.start(0);
+
+  const renderedBuffer = await offlineCtx.startRendering();
+
+  const data = renderedBuffer.getChannelData(0);
+  const buffer = new ArrayBuffer(44 + data.length * 2);
+  const view = new DataView(buffer);
+
+  const writeString = (v, offset, string) => {
+    for (let i = 0; i < string.length; i++) v.setUint8(offset + i, string.charCodeAt(i));
+  };
+  
+  writeString(view, 0, 'RIFF');
+  view.setUint32(4, 36 + data.length * 2, true);
+  writeString(view, 8, 'WAVE');
+  writeString(view, 12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
+  writeString(view, 36, 'data');
+  view.setUint32(40, data.length * 2, true);
+
+  let offset = 44;
+  for (let i = 0; i < data.length; i++) {
+    let s = Math.max(-1, Math.min(1, data[i]));
+    view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+    offset += 2;
+  }
+
+  return buffer;
+}
+
 const $=id=>document.getElementById(id);
 const post=(u,b)=>fetch(u,{method:'POST',headers:{'X-App':'1','Content-Type':'application/json'},body:JSON.stringify(b||{})}).then(r=>r.json());
 let sig='',loaded=false,pg=0,hasKey=false,S={queue:[],cfg:{}};
@@ -225,6 +395,7 @@ function renderMore(key,total,render){
 }
 async function refresh(){
   const response=await fetch('/api/state',{cache:'no-store'});const s=await response.json();
+  $('data-location').textContent=s.dataLocation||'Lokasi data tidak tersedia';
   const notice=$('maintenanceNotice');
   if(s.maintenance){
     notice.hidden=false;$('maintenanceReason').textContent=s.maintenanceReason||'Aplikasi sedang maintenance.';
@@ -272,9 +443,11 @@ async function add(fs){
     const errors=[];
     for(const f of files){
       try{
-        const response=await fetch('/api/add',{method:'POST',headers:{'X-App':'1','X-Name':encodeURIComponent(f.name)},body:f});
-        const result=await response.json();
-        if(!response.ok)errors.push(f.name+': '+(result.error||'Gagal menambahkan lagu.'));
+        let origBuf = await f.arrayBuffer();
+        const response = await fetch('/api/add',{method:'POST',headers:{'X-App':'1','X-Name':encodeURIComponent(f.name)},body:origBuf});
+        const result = await response.json();
+        if(!response.ok) errors.push(f.name+': '+(result.error||'Gagal menambahkan lagu.'));
+        else await idb.put(result.id, origBuf);
       }catch(e){errors.push(f.name+': Gagal mengirim file.')}
     }
   $('msg2').textContent=errors.length?errors.join(' '):files.length+' lagu ditambahkan ke antrean.';
@@ -285,6 +458,136 @@ const dr=$('drop');
 ['dragenter','dragover'].forEach(v=>dr.addEventListener(v,e=>{e.preventDefault();dr.classList.add('over')}));
 ['dragleave','drop'].forEach(v=>dr.addEventListener(v,e=>{e.preventDefault();dr.classList.remove('over')}));
 dr.addEventListener('drop',e=>add(e.dataTransfer.files));
+
+let speedSelectedFiles=[],speedDurationByFile=new WeakMap(),speedPreviewUrl='';
+function formatDuration(seconds){
+  if(!Number.isFinite(seconds)||seconds<0)return '—';
+  const minutes=Math.floor(seconds/60),remaining=(seconds-minutes*60).toFixed(1);
+  return minutes+' m '+remaining+' s';
+}
+function currentSpeed(){
+  const value=Number($('speedToolValue').value);
+  return Math.min(5,Math.max(0.1,Number.isFinite(value)?value:1));
+}
+function updateSpeedControls(value,fromRpm=false){
+  value=Math.min(5,Math.max(0.1,Number(value)||1));
+  if(!fromRpm){$('speedRpmFrom').value='none';$('speedRpmTo').value='none'}
+  const multiplier=value.toFixed(2);
+  const percent=((value-1)*100).toFixed(1);
+  $('speedToolValue').value=multiplier;
+  $('speedPercent').value=percent;
+  $('speedSlider').value=multiplier;
+  $('speedToolOutput').textContent=multiplier+'x · '+(value>1?'+':'')+percent+'%';
+  renderSpeedFiles();
+}
+function renderSpeedFiles(){
+  const box=$('speedFiles'),speed=currentSpeed();box.innerHTML='';
+  let total=0,known=0;
+  speedSelectedFiles.forEach(file=>{
+    const duration=speedDurationByFile.get(file),row=document.createElement('div');row.className='speed-file';
+    const name=document.createElement('span');name.textContent=file.name;
+    const current=document.createElement('span');current.className='st';current.textContent=formatDuration(duration);
+    const estimate=document.createElement('small');estimate.className='st';
+    estimate.textContent='Durasi baru: '+(Number.isFinite(duration)?formatDuration(duration/speed):'membaca durasi...');
+    row.append(name,current,estimate);box.appendChild(row);
+    if(Number.isFinite(duration)){total+=duration;known++}
+  });
+  $('speedCurrentLength').textContent=speedSelectedFiles.length&&known===speedSelectedFiles.length?formatDuration(total):'—';
+  $('speedNewLength').textContent=speedSelectedFiles.length&&known===speedSelectedFiles.length?formatDuration(total/speed):'—';
+  $('speedPreviewButton').disabled=!speedSelectedFiles.length||$('progSpeed').hidden===false;
+  $('speedApplyButton').disabled=!speedSelectedFiles.length||$('progSpeed').hidden===false;
+}
+function readAudioDuration(file){
+  return new Promise((resolve,reject)=>{
+    const audio=document.createElement('audio'),url=URL.createObjectURL(file);
+    const cleanup=()=>{audio.removeAttribute('src');audio.load();URL.revokeObjectURL(url)};
+    audio.preload='metadata';
+    audio.onloadedmetadata=()=>{const duration=audio.duration;cleanup();resolve(duration)};
+    audio.onerror=()=>{cleanup();reject(new Error('Durasi audio tidak dapat dibaca.'))};
+    audio.src=url;
+  });
+}
+function selectSpeedFiles(files){
+  speedSelectedFiles=Array.from(files).filter(file=>/\.(mp3|ogg|wav|flac)$/i.test(file.name));
+  if(speedPreviewUrl){URL.revokeObjectURL(speedPreviewUrl);speedPreviewUrl=''}
+  $('speedPreview').pause();$('speedPreview').hidden=true;$('msgSpeed').textContent='';
+  renderSpeedFiles();
+  speedSelectedFiles.forEach(async file=>{
+    try{speedDurationByFile.set(file,await readAudioDuration(file))}
+    catch(error){speedDurationByFile.set(file,NaN);$('msgSpeed').textContent=file.name+': '+error.message}
+    renderSpeedFiles();
+  });
+}
+function updateSpeedFromRpm(){
+  const from=Number($('speedRpmFrom').value),to=Number($('speedRpmTo').value);
+  if(!Number.isFinite(from)||!Number.isFinite(to))return;
+  updateSpeedControls(to/from,true);
+}
+function cancelSpeedSelection(){
+  speedSelectedFiles=[];
+  $('fileSpeed').value='';
+  if(speedPreviewUrl){URL.revokeObjectURL(speedPreviewUrl);speedPreviewUrl=''}
+  const player=$('speedPreview');player.pause();player.removeAttribute('src');player.hidden=true;
+  $('msgSpeed').textContent='Pilihan dibatalkan.';
+  renderSpeedFiles();
+}
+async function previewSpeed(){
+  const file=speedSelectedFiles[0];if(!file)return;
+  const button=$('speedPreviewButton');button.disabled=true;$('msgSpeed').textContent='Membuat preview '+file.name+'...';
+  try{
+    const output=await processAudioSpeed(await file.arrayBuffer(),currentSpeed(),$('speedUseFilter').checked);
+    if(speedPreviewUrl)URL.revokeObjectURL(speedPreviewUrl);
+    speedPreviewUrl=URL.createObjectURL(new Blob([output],{type:'audio/wav'}));
+    const player=$('speedPreview');player.src=speedPreviewUrl;player.hidden=false;
+    try{await player.play();$('msgSpeed').textContent='Preview: '+file.name}
+    catch(error){$('msgSpeed').textContent='Preview siap. Tekan tombol play pada pemutar audio di atas.'}
+  }catch(error){
+    $('msgSpeed').textContent='Preview gagal: '+error.message;
+  }finally{
+    button.disabled=false;
+    $('speedApplyButton').disabled=!speedSelectedFiles.length;
+  }
+}
+async function applySpeed(){
+  const files=speedSelectedFiles.slice();if(!files.length)return;
+  const speed=currentSpeed(),useFilter=$('speedUseFilter').checked,errors=[];
+  $('progSpeed').hidden=false;renderSpeedFiles();
+  try{
+    for(const file of files){
+      try{
+        const original=await file.arrayBuffer();
+        const output=speed===1&&!useFilter?original:await processAudioSpeed(original,speed,useFilter);
+        const suffix=speed!==1?' '+Number(speed.toFixed(2)):'';
+        const name=speed===1&&!useFilter?file.name:file.name.replace(/\.[^/.]+$/,'')+suffix+'.wav';
+        $('msgSpeed').textContent='Memasukkan '+name+' ke antrean...';
+        const response=await fetch('/api/add',{method:'POST',headers:{'X-App':'1','X-Name':encodeURIComponent(name)},body:output});
+        const result=await response.json();
+        if(!response.ok)errors.push(name+': '+(result.error||'Gagal menambahkan lagu.'));
+        else await idb.put(result.id,original);
+      }catch(error){errors.push(file.name+': '+error.message)}
+    }
+  }finally{
+    $('progSpeed').hidden=true;renderSpeedFiles();
+  }
+  $('msgSpeed').textContent=errors.length?errors.join(' '):files.length+' lagu selesai diproses dan masuk antrean upload.';
+  sig='';refresh();
+}
+$('fileSpeed').onchange=e=>{selectSpeedFiles(e.target.files);e.target.value=''};
+const drS=$('dropSpeed');
+['dragenter','dragover'].forEach(v=>drS.addEventListener(v,e=>{e.preventDefault();drS.classList.add('over')}));
+['dragleave','drop'].forEach(v=>drS.addEventListener(v,e=>{e.preventDefault();drS.classList.remove('over')}));
+drS.addEventListener('drop',e=>selectSpeedFiles(e.dataTransfer.files));
+$('speedToolValue').oninput=e=>updateSpeedControls(e.target.value);
+$('speedToolValue').onchange=e=>updateSpeedControls(e.target.value);
+$('speedPercent').oninput=e=>updateSpeedControls(1+Number(e.target.value)/100);
+$('speedPercent').onchange=e=>updateSpeedControls(1+Number(e.target.value)/100);
+$('speedSlider').oninput=e=>updateSpeedControls(e.target.value);
+$('speedRpmFrom').onchange=updateSpeedFromRpm;
+$('speedRpmTo').onchange=updateSpeedFromRpm;
+$('speedPreviewButton').onclick=previewSpeed;
+$('speedCancelButton').onclick=cancelSpeedSelection;
+$('speedApplyButton').onclick=applySpeed;
+updateSpeedControls(2);
 const PG=document.querySelectorAll('.pg');
 function keyHint(){$('key').placeholder=hasKey?'Sudah tersimpan (isi lagi kalau mau ganti)':'Tempel kunci API di sini'}
 function show(n){pg=n;PG.forEach((e,i)=>e.hidden=i!==n);$('prev').hidden=n===0;$('next').textContent=n===PG.length-1?'Ke halaman upload':'Lanjut';
@@ -318,19 +621,110 @@ $('check').onclick=async()=>{await post('/api/check');$('msg2').textContent='Men
 $('retry').onclick=async()=>{await post('/api/retry');sig='';refresh()};
 function izinTxt(q){const z=q.izin||{},k=Object.keys(z);if(!k.length)return '-';
   return k.map(x=>{const a=x.split(':');return (z[x]==='ok'?'ok ':'gagal ')+({Group:'Komunitas ',User:'Akun ',Universe:'Experience '}[a[0]])+a[1]}).join(', ')}
+async function doAutoRetry(q, rootId, nextAttempt) {
+  try {
+    say('Mengambil file asli...');
+    let buf = await idb.get(rootId);
+    if (!buf && q.id !== rootId) buf = await idb.get(q.id);
+    if (!buf) return alert('File asli tidak ditemukan di memori browser. Silakan upload ulang secara manual.');
+    say('Memproses audio ke speed ' + nextAttempt + '...');
+    const outBuf = await processAudioSpeed(buf, nextAttempt, $('speedUseFilter').checked);
+    let baseTitle = q.title;
+    if (q.speedAttempt) baseTitle = baseTitle.replace(/ \d+(\.\d+)?$/, '');
+    const newName = `${baseTitle} ${nextAttempt}`;
+    say('Mengupload ulang...');
+    const res = await fetch('/api/add', {
+      method: 'POST',
+      headers: { 'X-App': '1', 'X-Name': encodeURIComponent(newName + '.wav'), 'X-Original-Id': rootId, 'X-Speed-Attempt': String(nextAttempt) },
+      body: outBuf
+    });
+    const result = await res.json();
+    if (result.ok) {
+      await idb.put(result.id, outBuf);
+      say('Berhasil masuk antrean!'); sig=''; refresh();
+    } else say(result.error || 'Gagal');
+  } catch(e) { console.error(e); alert('Gagal memproses audio: ' + e.message); }
+}
+
 function renderHis(){
-  const f=$('flt').value,tb=document.querySelector('#tb tbody'),lab={disetujui:'Disetujui',ditolak:'Ditolak',diperiksa:'Diperiksa'};
-  const list=S.queue.slice().reverse().filter(q=>!f||(f==='berhasil'||f==='gagal'?q.status===f:q.mod===f));
+  const f=$('flt').value,query=$('historySearch').value.trim().toLocaleLowerCase(),tb=document.querySelector('#tb tbody');
+  const list=S.queue.slice().reverse().filter(q=>{
+    const statusMatch=!f||(f==='berhasil'||f==='gagal'?q.status===f:q.mod===f);
+    const searchMatch=!query||[q.title,q.assetId,q.waktu,q.status,q.mod,q.note,q.moderationReason,q.pemilik]
+      .some(value=>String(value||'').toLocaleLowerCase().includes(query));
+    return statusMatch&&searchMatch;
+  });
   tb.innerHTML='';
-    list.slice(0,visible.history).forEach((q,n)=>{
-    const tr=document.createElement('tr');tr.style.animationDelay=Math.min(n,15)*30+'ms';
-    const own=q.pemilik==='beda'?['Beda akun','gagal']:q.pemilik==='sama'?['Sama','berhasil']:['?','menunggu'];
-    const rob=q.status==='berhasil'?[lab[q.mod]||'Menunggu',q.mod==='disetujui'?'berhasil':q.mod==='ditolak'?'gagal':'mengupload']:['-',''];
-    [[q.waktu||'-'],[q.title],[q.assetId||'-'],q.arsip?['Diarsipkan','menunggu']:[q.status,q.status==='berhasil'?'berhasil':q.status==='gagal'?'gagal':'mengupload'],rob,own,[izinTxt(q)],[[q.note,q.moderationReason&&'Alasan Roblox: '+q.moderationReason].filter(Boolean).join(' - ')||'']].forEach(c=>{
+  list.slice(0,visible.history).forEach((q,n)=>{
+    const tr=document.createElement('tr');
+    tr.style.animationDelay=Math.min(n,15)*30+'ms';
+    const addCell=(value,className='')=>{
       const td=document.createElement('td');
-      if(c[1]){const sp=document.createElement('span');sp.className='pill '+c[1];sp.textContent=c[0];td.appendChild(sp)}else td.textContent=c[0];
-      tr.appendChild(td)});
-    const ac=document.createElement('td');ac.className='act';
+      if(className)td.className=className;
+      td.textContent=value||'-';
+      tr.appendChild(td);
+      return td;
+    };
+    const addPill=(td,label,status)=>{
+      const pill=document.createElement('span');
+      pill.className='pill '+(status||'');
+      pill.textContent=label;
+      td.replaceChildren(pill);
+    };
+    addCell(q.waktu||'-','time');
+    addCell(q.title||'-','song-title');
+    addCell(q.assetId||'-','asset-id');
+    const uploadCell=addCell('');
+    const uploadLabel=q.status==='berhasil'?'Terkirim':q.status==='gagal'?'Gagal':
+      q.status==='mengupload'?'Mengupload':'Antrean';
+    addPill(uploadCell,uploadLabel,q.status==='berhasil'?'berhasil':
+      q.status==='gagal'?'gagal':q.status==='mengupload'?'mengupload':'');
+    const moderationCell=addCell('');
+    const moderationLabel=q.arsip?'Diarsipkan':q.status!=='berhasil'?'Belum dikirim':
+      ({disetujui:'Disetujui',ditolak:'Ditolak',diperiksa:'Diperiksa'}[q.mod]||'Menunggu');
+    const moderationClass=q.arsip?'':q.mod==='disetujui'?'berhasil':
+      q.mod==='ditolak'?'gagal':q.mod==='diperiksa'?'mengupload':'';
+    addPill(moderationCell,moderationLabel,moderationClass);
+    const ownerCell=addCell('');
+    addPill(ownerCell,q.pemilik==='beda'?'Beda akun':
+      q.pemilik==='sama'?'Akun ini':'Tidak diketahui',
+      q.pemilik==='beda'?'gagal':q.pemilik==='sama'?'berhasil':'');
+    addCell(izinTxt(q),'permissions');
+    const noteCell=addCell('');
+    const notes=[q.note,q.moderationReason&&'Alasan Roblox: '+q.moderationReason].filter(Boolean);
+    noteCell.textContent=notes.join('\n')||'-';
+    
+    if (q.status === 'berhasil' && q.mod === 'ditolak' && !q.imported) {
+      let attempt = Number(q.speedAttempt) || 1;
+      let rootId = q.originalId || q.id;
+      let nextAttempt = attempt === 1 ? 2 : (attempt === 2 ? 2.5 : null);
+      if (nextAttempt) {
+        let hasNext = S.queue.some(x => (x.originalId || x.id) === rootId && Number(x.speedAttempt) === nextAttempt);
+        if (!hasNext) {
+          const sBox = document.createElement('div');
+          sBox.style.cssText = 'margin-top:8px;padding:8px;background:rgba(255,209,102,0.1);border:1px solid var(--warn);border-radius:6px;font-size:0.8rem;';
+          sBox.textContent = `Mau cobain speed ${nextAttempt}?`;
+          const actBox = document.createElement('div');
+          actBox.style.cssText = 'display:flex;gap:6px;margin-top:6px;';
+          const bAuto = document.createElement('button');
+          bAuto.textContent = 'Otomatis'; bAuto.style.padding = '3px 8px';
+          bAuto.onclick = () => doAutoRetry(q, rootId, nextAttempt);
+          const bMan = document.createElement('button');
+          bMan.textContent = 'Manual'; bMan.style.padding = '3px 8px';
+          bMan.onclick = () => {
+             document.querySelector('.tabs button[data-t="speed"]').click();
+             $('speedToolValue').value = nextAttempt;
+             updateSpeedLabel();
+             $('msgSpeed').textContent = `Silakan masukkan file lagunya di sini. Kecepatan sudah diset ke ${nextAttempt}.`;
+          };
+          actBox.append(bAuto, bMan);
+          sBox.appendChild(actBox);
+          noteCell.appendChild(sBox);
+        }
+      }
+    }
+    
+    const ac=addCell('','act');
     if(q.status==='berhasil'&&q.assetId&&q.pemilik!=='beda'){
       const b1=document.createElement('button');b1.textContent='Ubah';b1.onclick=()=>openEdit(q);
       const b2=document.createElement('button');b2.textContent=q.arsip?'Pulihkan':'Arsipkan';
@@ -338,9 +732,12 @@ function renderHis(){
         if(!q.arsip&&!confirm('Lagu ini akan hilang dari website Roblox dan tidak bisa diputar di game sampai dipulihkan. Lanjut?'))return;
         const r=await post('/api/asset/archive',{id:q.id,restore:!!q.arsip});$('hmsg').textContent=r.error||'Diproses...'};
       ac.append(b1,b2)}else ac.textContent='-';
-    tr.appendChild(ac);
-    tb.appendChild(tr)});
-    $('empty2').hidden=list.length>0;renderMore('history',list.length,renderHis)}
+    tb.appendChild(tr);
+  });
+  $('empty2').hidden=list.length>0;
+  $('empty2').textContent=S.queue.length?'Tidak ada lagu yang cocok dengan pencarian atau filter.':'Belum ada riwayat.';
+  renderMore('history',list.length,renderHis)
+}
 function renderT(){
   const box=$('tlist');box.innerHTML='';
   (S.cfg.targets||[]).forEach(t=>{
@@ -389,7 +786,7 @@ $('tq').oninput=()=>{
       box.appendChild(b)})},400)};
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));
-  ['up','his','izin','pl'].forEach(t=>$('t-'+t).hidden=t!==b.dataset.t);renderHis();renderT();renderM()});
+  ['up','speed','his','izin','pl'].forEach(t=>$('t-'+t).hidden=t!==b.dataset.t);renderHis();renderT();renderM()});
 const pick=new Set();
 const TLB={Group:'Komunitas ',User:'Akun ',Universe:'Experience '};
 const elig=q=>q.status==='berhasil'&&q.mod==='disetujui'&&q.pemilik!=='beda'&&!q.arsip&&q.assetId;
@@ -447,12 +844,15 @@ $('esave').onclick=async()=>{
   $('hmsg').textContent=r.error||'Menyimpan perubahan ke Roblox...';$('dlg').close()};
 $('ecancel').onclick=()=>$('dlg').close();
 $('flt').onchange=()=>{visible.history=5;renderHis()};
+$('historySearch').oninput=()=>{visible.history=5;renderHis()};
 $('impgo').onclick=async()=>{const r=await post('/api/import',{text:$('imptxt').value});$('impmsg').textContent=r.error||'Diproses...';if(!r.error)$('imptxt').value=''};
 $('csv').onclick=()=>{
     const rows=[['Waktu','Judul','File','Asset ID','Status kirim','Status Roblox','Akun','Izin akses','Catatan']].concat(S.queue.map(q=>[q.waktu||'',q.title,q.file||(q.title+(q.audioExt||'')),q.assetId||'',q.status,q.mod||'',q.pemilik||'',izinTxt(q),[q.note,q.moderationReason&&'Alasan Roblox: '+q.moderationReason].filter(Boolean).join(' - ')]));
   const csv='\ufeff'+rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\r\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='riwayat-upload.csv';a.click()};
 let PL=[],plInit=false,ed=null;const plPick=new Set();
+const playlistTrackEligible=q=>q.status==='berhasil'&&q.assetId&&!q.arsip&&q.pemilik!=='beda'&&q.mod!=='ditolak';
+const matchesSearch=(values,query)=>!query||values.some(value=>String(value??'').toLocaleLowerCase().includes(query));
 function plSel(v){const s=$('plsel');s.innerHTML='';s.add(new Option('- pilih playlist -',''));PL.forEach(p=>s.add(new Option(p.name+' ('+p.songs.length+' lagu)',p.id)));s.value=v||''}
 function plMsg(t){$('plmsg').textContent=t}
 function loadEd(id){const p=PL.find(x=>x.id===id);plPick.clear();
@@ -469,7 +869,11 @@ $('plart').oninput=()=>{if(ed)ed.artist=$('plart').value};
 function mv(i,d){const j=i+d;if(j<0||j>=ed.songs.length)return;[ed.songs[i],ed.songs[j]]=[ed.songs[j],ed.songs[i]];renderPl()}
 function renderPl(){
   if(!ed)return;const tb=document.querySelector('#plt tbody');tb.innerHTML='';
-  ed.songs.forEach((s,i)=>{
+  const query=$('plSongSearch').value.trim().toLocaleLowerCase(),filter=$('plSongFilter').value;
+  const songs=ed.songs.map((song,index)=>({song,index})).filter(({song})=>
+    matchesSearch([song.name,song.artist,song.songId],query)&&
+    (!filter||(filter==='speed'?song.speed!==null&&song.speed!==undefined&&song.speed!=='':song.speed===null||song.speed===undefined||song.speed==='')));
+  songs.forEach(({song:s,index:i})=>{
     const tr=document.createElement('tr');
     const cell=el=>{const td=document.createElement('td');td.appendChild(el);tr.appendChild(td)};
     const inp=(key,w,val)=>{const e=document.createElement('input');e.type='text';e.value=val;e.style.width=w;e.oninput=()=>{s[key]=e.value};return e};
@@ -479,21 +883,30 @@ function renderPl(){
     const ac=document.createElement('td');ac.className='act';
     ac.append(mk('\u2191',()=>mv(i,-1),'Naik'),mk('\u2193',()=>mv(i,1),'Turun'),mk('\u00d7',()=>{ed.songs.splice(i,1);renderPl()},'Hapus'));
     tr.appendChild(ac);tb.appendChild(tr)});
-  $('plcount').textContent=ed.songs.length+' lagu di playlist ini';
+  $('plcount').textContent=songs.length+' dari '+ed.songs.length+' lagu ditampilkan';
   renderPlAdd()}
 function renderPlAdd(){
   const box=$('pladd');box.innerHTML='';if(!ed)return;
   const have=new Set(ed.songs.map(s=>String(s.songId)));
-  const lab={disetujui:'disetujui',ditolak:'DITOLAK',diperiksa:'diperiksa'};
-  const list=S.queue.filter(q=>q.status==='berhasil'&&q.assetId&&!q.arsip&&q.pemilik!=='beda'&&!have.has(String(q.assetId))).slice().reverse();
-  $('pladdn').textContent=list.length?'('+list.length+' tersedia)':'(tidak ada lagu baru)';
-  list.slice(0,300).forEach(q=>{const l=document.createElement('label');l.className='chk';
+  const lab={disetujui:'disetujui',diperiksa:'diperiksa'};
+  const list=S.queue.filter(q=>playlistTrackEligible(q)&&!have.has(String(q.assetId))).slice().reverse();
+  const query=$('pladdSearch').value.trim().toLocaleLowerCase();
+  const filtered=list.filter(q=>matchesSearch([q.title,q.assetId],query));
+  $('pladdn').textContent=list.length?'('+filtered.length+' dari '+list.length+' tersedia)':'(tidak ada lagu baru)';
+  if(!filtered.length){const empty=document.createElement('p');empty.className='st';empty.textContent=list.length?'Tidak ada lagu yang cocok dengan pencarian.':'Tidak ada lagu baru yang memenuhi syarat untuk playlist.';box.appendChild(empty);return}
+  filtered.slice(0,300).forEach(q=>{const l=document.createElement('label');l.className='chk';
     const c=document.createElement('input');c.type='checkbox';c.dataset.id=q.id;c.checked=plPick.has(q.id);
     c.onchange=()=>{c.checked?plPick.add(q.id):plPick.delete(q.id)};
     l.append(c,' '+q.title+' - ID '+q.assetId+' ('+(lab[q.mod]||'menunggu')+')');box.appendChild(l)})}
 $('pladdall').onclick=()=>$('pladd').querySelectorAll('input').forEach(c=>{c.checked=true;plPick.add(c.dataset.id)});
+$('plSongSearch').oninput=renderPl;
+$('plSongFilter').onchange=renderPl;
+$('pladdSearch').oninput=renderPlAdd;
 $('pladdgo').onclick=()=>{if(!ed)return;const art=$('plart').value;
-  S.queue.filter(q=>plPick.has(q.id)).forEach(q=>ed.songs.push({name:q.title,artist:art,songId:String(q.assetId),speed:null,extra:{}}));
+  const have=new Set(ed.songs.map(s=>String(s.songId)));
+  S.queue.filter(q=>plPick.has(q.id)&&playlistTrackEligible(q)&&!have.has(String(q.assetId))).forEach(q=>{
+    have.add(String(q.assetId));ed.songs.push({name:q.title,artist:art,songId:String(q.assetId),speed:null,extra:{}})
+  });
   plPick.clear();renderPl()};
 $('plmgo').onclick=()=>{if(!ed)return;const n=$('plmn').value.trim(),id=$('plmid').value.trim();
   if(!n||!/^\d+$/.test(id)){plMsg('Isi judul dan Song ID (angka).');return}
