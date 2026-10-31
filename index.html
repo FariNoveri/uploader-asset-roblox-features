@@ -49,9 +49,10 @@ button:active{transform:scale(.97)}
 .tabs{display:flex;gap:6px;margin-bottom:18px;padding:6px;background:#0b0506;border:1px solid var(--line);border-radius:12px}
 .tabs button{flex:1;border-color:transparent;background:transparent;padding:9px 8px}
 .tabs button.on{background:rgba(255,42,58,.3);border-color:var(--red);box-shadow:0 0 18px rgba(255,42,58,.35)}
-.drop{display:block;text-align:center;padding:34px 16px;border:1.5px dashed var(--red);border-radius:12px;cursor:pointer;color:#c9c3c5;background:rgba(255,42,58,.04);transition:background .25s,transform .25s,box-shadow .25s}
+.drop{display:block;position:relative;text-align:center;padding:34px 16px;border:1.5px dashed var(--red);border-radius:12px;cursor:pointer;color:#c9c3c5;background:rgba(255,42,58,.04);transition:background .25s,transform .25s,box-shadow .25s}
 .drop:hover,.drop.over{background:rgba(255,42,58,.14);transform:scale(1.01);box-shadow:0 0 30px rgba(255,42,58,.25)}
-.drop input{display:none}
+.drop:focus-within{outline:2px solid var(--red);outline-offset:3px}
+.drop input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
 .it{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07);animation:slide .35s ease both}
 .load-fade{position:relative}
 .load-fade.has-more:after{content:"";position:absolute;z-index:1;left:0;right:0;bottom:0;height:46px;background:linear-gradient(transparent,#0b0506);pointer-events:none}
