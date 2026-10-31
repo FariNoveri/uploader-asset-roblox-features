@@ -53,6 +53,8 @@ button:active{transform:scale(.97)}
 .drop:hover,.drop.over{background:rgba(255,42,58,.14);transform:scale(1.01);box-shadow:0 0 30px rgba(255,42,58,.25)}
 .drop:focus-within{outline:2px solid var(--red);outline-offset:3px}
 .drop input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.file-drop input{display:none}
+.file-drop button{display:block;margin:14px auto 0}
 .it{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07);animation:slide .35s ease both}
 .load-fade{position:relative}
 .load-fade.has-more:after{content:"";position:absolute;z-index:1;left:0;right:0;bottom:0;height:46px;background:linear-gradient(transparent,#0b0506);pointer-events:none}
@@ -195,7 +197,10 @@ input[type=checkbox]{accent-color:var(--red)}
 </section></div>
 
 <div class="tab" id="t-up"><section class="box">
- <label class="drop" id="drop"><input type="file" id="files" accept=".mp3,.ogg,.wav,.flac" multiple>Taruh lagu di sini untuk upload normal, atau klik untuk memilih</label>
+ <div class="drop file-drop" id="drop">Taruh lagu di sini untuk upload normal, atau pilih beberapa lagu
+  <button type="button" id="chooseFiles">Pilih beberapa lagu</button>
+  <input type="file" id="files" accept=".mp3,.ogg,.wav,.flac" multiple>
+ </div>
  <p class="st">File lagu hanya disimpan sementara di memori, bukan di disk. Data aplikasi disimpan di <code id="data-location">memeriksa lokasi...</code>. Jika aplikasi ditutup sebelum upload berhasil, pilih ulang file tersebut untuk mencobanya lagi.</p>
  <div class="load-fade" id="uploadFade"><div id="list"></div></div><div class="bar load-controls" id="uploadMore" hidden></div>
  <div class="prog" id="prog" hidden><i></i></div>
@@ -441,20 +446,25 @@ function renderUpload(){
 }
 async function add(fs){
     const files=Array.from(fs);
+    if(!files.length)return;
     const errors=[];
+    let added=0;
+    $('msg2').textContent=files.length+' file dipilih. Menambahkan ke antrean...';
     for(const f of files){
       try{
         let origBuf = await f.arrayBuffer();
         const response = await fetch('/api/add',{method:'POST',headers:{'X-App':'1','X-Name':encodeURIComponent(f.name)},body:origBuf});
         const result = await response.json();
         if(!response.ok) errors.push(f.name+': '+(result.error||'Gagal menambahkan lagu.'));
-        else await idb.put(result.id, origBuf);
+        else {added++;await idb.put(result.id, origBuf)}
       }catch(e){errors.push(f.name+': Gagal mengirim file.')}
     }
-  $('msg2').textContent=errors.length?errors.join(' '):files.length+' lagu ditambahkan ke antrean.';
+  $('msg2').textContent=(errors.length?added+' dari '+files.length+' lagu ditambahkan. '+errors.join(' '):added+' lagu ditambahkan ke antrean.');
   sig='';refresh();
 }
-$('files').onchange=e=>{add(e.target.files);e.target.value=''};
+const filePicker=$('files');
+$('chooseFiles').onclick=()=>filePicker.click();
+filePicker.onchange=e=>{const files=Array.from(e.target.files||[]);e.target.value='';if(files.length)add(files)};
 const dr=$('drop');
 ['dragenter','dragover'].forEach(v=>dr.addEventListener(v,e=>{e.preventDefault();dr.classList.add('over')}));
 ['dragleave','drop'].forEach(v=>dr.addEventListener(v,e=>{e.preventDefault();dr.classList.remove('over')}));

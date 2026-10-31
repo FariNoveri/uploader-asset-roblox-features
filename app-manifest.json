@@ -1,9 +1,9 @@
 {
-  "version": "1.4.6",
+  "version": "1.4.7",
   "minimumLauncherVersion": "1.3.0",
   "credit": "Fari Noveri",
   "license": "All Rights Reserved",
   "licenseApiUrl": "https://fari-uploader-license.cahayalunamaharani1.workers.dev",
   "websiteUrl": "https://raw.githubusercontent.com/FariNoveri/uploader-asset-roblox-features/main/index.html",
-  "sha256": "6c1b7ef93c68379199852610070594f88379411e662260bcae7c849b62e66577"
+  "sha256": "716b446d9ba9461981b1b494ae4bcd692356ed3c274314e511a2e85f63bccbeb"
 }
